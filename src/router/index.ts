@@ -70,6 +70,11 @@ const router = createRouter({
       },
     },
     {
+      path: '/register',
+      name: 'register',
+      component: () => import('@/pages/RegisterPage.vue'),
+    },
+    {
       path: '/reset-password',
       name: 'reset-password',
       component: () => import('@/pages/LoginPage.vue'),
