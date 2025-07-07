@@ -18,14 +18,12 @@ export const useAuthStore = defineStore('auth', {
         async register({email, username, contactNumber, password}) {
             console.log({email, username, contactNumber, password});
             try {
-                const response = await axios.post('/api/teacher', {
-                    teacher: {
+                const response = await axios.post('/api/auth/student/register', {
                         email,
                         firstName: username,
                         lastName: username,
                         phone: Array.isArray(contactNumber) ? contactNumber : [contactNumber],
                         password,
-                    }
                 });
                 this.token = response.data.token;
                 this.user = response.data.user;
