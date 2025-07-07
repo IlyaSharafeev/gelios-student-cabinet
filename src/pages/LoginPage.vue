@@ -245,6 +245,7 @@ watch(route, () => {
           <div class="refresh" @click="showPasswordRecovery">{{ t("login.form.recover") }}</div>
         </div>
       </div>
+      <div class="button-register" @click="router.push('/register')">Реєстрація</div>
     </div>
 
     <div class="password-reset" v-else-if="isResetPasswordVisible">
@@ -1072,6 +1073,24 @@ watch(route, () => {
     font-family: Onest;
     font-size: 14px;
     margin-top: 8px;
+  }
+}
+
+.button-register {
+  background: #454A53;
+  padding: 15px;
+  color: #FFFFFF;
+  font-family: Onest;
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-align: center;
+  border-radius: 16px;
+  cursor: pointer;
+  
+  &:hover {
+    background: #353639;
   }
 }
 </style>
