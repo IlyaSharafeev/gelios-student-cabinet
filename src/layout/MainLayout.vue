@@ -3,78 +3,81 @@
 
 <template>
   <div class="layout">
-    <div class="sidebar-wrapper">
-      <aside class="sidebar">
-        <nav>
-          <div class="logo-mobile"></div>
-          <ul>
-            <li>
-              <router-link to="/dashboard" class="sidebar-link">
-                <img
-                    src="@/assets/images/sidebar/dashboard.svg"
-                    alt="Dashboard"
-                    class="sidebar-icon"
-                />
-              </router-link>
-            </li>
-            <li>
-              <router-link to="/schedule" class="sidebar-link">
-                <img
-                    src="@/assets/images/sidebar/calendar.svg"
-                    alt="schedule"
-                    class="sidebar-icon"
-                />
-              </router-link>
-            </li>
-            <li>
-              <router-link to="/homework" class="sidebar-link">
-                <img
-                    src="@/assets/images/sidebar/homework.svg"
-                    alt="homework"
-                    class="sidebar-icon"
-                />
-              </router-link>
-            </li>
-            <li>
-              <router-link to="/add-homework" class="sidebar-link">
-                <img
-                    src="@/assets/images/sidebar/add-homework.svg"
-                    alt="homework"
-                    class="sidebar-icon"
-                />
-              </router-link>
-            </li>
-            <li>
-              <router-link to="/students" class="sidebar-link">
-                <img
-                    src="@/assets/images/sidebar/students.svg"
-                    alt="students"
-                    class="sidebar-icon"
-                />
-              </router-link>
-            </li>
-            <li>
-              <router-link to="/settings" class="sidebar-link">
-                <img
-                    src="@/assets/images/sidebar/settings.svg"
-                    alt="students"
-                    class="sidebar-icon"
-                />
-              </router-link>
-            </li>
-          </ul>
-        </nav>
-      </aside>
+    <div class="buildings">
+      <div class="sidebar-wrapper">
+        <aside class="sidebar">
+          <nav>
+            <div class="logo-mobile"></div>
+            <ul>
+              <li>
+                <router-link to="/dashboard" class="sidebar-link">
+                  <img
+                      src="@/assets/images/sidebar/dashboard.svg"
+                      alt="Dashboard"
+                      class="sidebar-icon"
+                  />
+                </router-link>
+              </li>
+              <li>
+                <router-link to="/schedule" class="sidebar-link">
+                  <img
+                      src="@/assets/images/sidebar/calendar.svg"
+                      alt="schedule"
+                      class="sidebar-icon"
+                  />
+                </router-link>
+              </li>
+              <li>
+                <router-link to="/homework" class="sidebar-link">
+                  <img
+                      src="@/assets/images/sidebar/homework.svg"
+                      alt="homework"
+                      class="sidebar-icon"
+                  />
+                </router-link>
+              </li>
+              <li>
+                <router-link to="/add-homework" class="sidebar-link">
+                  <img
+                      src="@/assets/images/sidebar/add-homework.svg"
+                      alt="homework"
+                      class="sidebar-icon"
+                  />
+                </router-link>
+              </li>
+              <li>
+                <router-link to="/students" class="sidebar-link">
+                  <img
+                      src="@/assets/images/sidebar/students.svg"
+                      alt="students"
+                      class="sidebar-icon"
+                  />
+                </router-link>
+              </li>
+              <li>
+                <router-link to="/settings" class="sidebar-link">
+                  <img
+                      src="@/assets/images/sidebar/settings.svg"
+                      alt="students"
+                      class="sidebar-icon"
+                  />
+                </router-link>
+              </li>
+            </ul>
+          </nav>
+        </aside>
 
-      <aside class="logo-wrapper">
-        <div class="logo"></div>
-      </aside>
+        <aside class="logo-wrapper">
+          <div class="logo"></div>
+        </aside>
+      </div>
+
+      <main class="content">
+        <router-view />
+      </main>
+
+      <div class="characters"></div>
     </div>
-
-
-    <main class="content">
-      <router-view />
-    </main>
   </div>
 </template>
 
@@ -91,7 +94,34 @@
   background: #A0E3FF;
   background: -webkit-linear-gradient(90deg, #A0E3FF 0%, #49A7FF 100%);
   background: linear-gradient(90deg, #A0E3FF 0%, #49A7FF 100%);
+  overflow: hidden;
 }
+
+.buildings {
+  position: relative;
+  background: url('@/assets/backgrounds/buildings.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 100%;
+  height: 100vh;
+}
+
+.characters {
+  background: url('@/assets/backgrounds/characters.png');
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  /* Использование vw и vh для ширины и высоты */
+  width: 40vw; /* Пример: 40% от ширины вьюпорта */
+  height: 70vh; /* Пример: 70% от высоты вьюпорта */
+  position: absolute;
+  /* Позиционирование относительно вьюпорта */
+  right: -5vw; /* Пример: -5% от ширины вьюпорта */
+  bottom: -20vh; /* Пример: -20% от высоты вьюпорта */
+  transform: translateY(0px);
+}
+
 
 .sidebar {
   background: #ffffff;
@@ -185,10 +215,6 @@
     flex-grow: 1;
   }
 
-  .logo-wrapper {
-    display: none;
-  }
-
   .logo-mobile {
     width: 50px;
     height: 50px;
@@ -206,6 +232,9 @@
     margin-left: 0;
     width: 100%;
   }
-}
 
+  .logo-wrapper {
+    display: none;
+  }
+}
 </style>
