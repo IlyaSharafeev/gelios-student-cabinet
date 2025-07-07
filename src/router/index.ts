@@ -28,18 +28,18 @@ const router = createRouter({
           name: 'homework',
           component: () => import('@/pages/HomeworkPage.vue'),
         },
-        {
-          path: 'games',
-          name: 'games-grid', // Переименовываем для ясности
-          component: GamesPage,
-          children: [ // Добавляем дочерний роут
-            {
-              path: ':trainerSlug',
-              name: 'game-view',
-              component: GamesPage, // Тот же компонент будет обрабатывать и игру
-            }
-          ]
-        },
+        // {
+        //   path: 'games',
+        //   name: 'games-grid', // Переименовываем для ясности
+        //   component: GamesPage,
+        //   children: [ // Добавляем дочерний роут
+        //     {
+        //       path: ':trainerSlug',
+        //       name: 'game-view',
+        //       component: GamesPage, // Тот же компонент будет обрабатывать и игру
+        //     }
+        //   ]
+        // },
         {
           path: 'add-homework',
           name: 'add-homework',
