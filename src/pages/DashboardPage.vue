@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import { useI18n } from "vue-i18n";
 
 interface Statistic {
@@ -16,6 +17,15 @@ interface Homework {
   trainerName: string;
   date: string;
   isOverdue: boolean;
+}
+
+interface Course {
+  title: string;
+  teacher: string;
+  progress: string;
+  total: string;
+  isLocked: boolean;
+  progressColor: string;
 }
 
 const statistics: Statistic[] = [
@@ -39,62 +49,102 @@ const homeworks: Homework[] = [
   { studentName: "Азарко А.Б.", trainerName: "Кіберкiшка", date: "3 Жовтня 12:30", isOverdue: false }
 ];
 
+const courses: Course[] = [
+  { title: "Швидкочитання", teacher: "Засядько I.О.", progress: "12", total: "48", isLocked: false, progressColor: 'green' },
+  { title: "Математика", teacher: "Стефак М.С.", progress: "7", total: "24", isLocked: false, progressColor: 'green' },
+  { title: "Ментальна арифметика", teacher: "", progress: "", total: "", isLocked: true, progressColor: '' },
+  { title: "Українська мова", teacher: "", progress: "", total: "", isLocked: true, progressColor: '' },
+  { title: "Українська мова", teacher: "Засядько I.О.", progress: "1", total: "48", isLocked: false, progressColor: 'red' },
+  { title: "Історія України", teacher: "Петренко О.П.", progress: "5", total: "10", isLocked: false, progressColor: 'green' },
+  { title: "Фізика", teacher: "", progress: "", total: "", isLocked: true, progressColor: '' },
+  { title: "Хімія", teacher: "Сидоренко В.В.", progress: "8", total: "15", isLocked: false, progressColor: 'green' },
+];
+
 const { t } = useI18n();
+
+const coursesContainer = ref<HTMLElement | null>(null);
+
+const scrollAmount = 150;
+
+const scrollUp = () => {
+  if (coursesContainer.value) {
+    coursesContainer.value.scrollBy({
+      top: -scrollAmount,
+      behavior: 'smooth'
+    });
+  }
+};
+
+const scrollDown = () => {
+  if (coursesContainer.value) {
+    coursesContainer.value.scrollBy({
+      top: scrollAmount,
+      behavior: 'smooth'
+    });
+  }
+};
 </script>
 
 <template>
   <div class="dashboard">
-    <div class="header">
-      <div class="welcome-message">
-        <div class="text">
-          {{ t('dashboard.greeting') }}, Оксана
+    <div class="dashboard__columns">
+      <div class="dashboard__column dashboard__column--direction">
+        <div class="dashboard__direction-title">
+          Доброго ранку, Остап
         </div>
-        <div class="pencil-background"></div>
-      </div>
-      <div class="profile">
-        <div class="notification-wrapper cursor-pointer">
-          <div class="notification"></div>
-        </div>
-        <div class="profile-image cursor-pointer"></div>
-      </div>
-    </div>
-    <div class="main">
-      <div class="content-left">
-        <div class="statistic">
-          <div class="statistic_title">
-            {{ t('dashboard.statistics.title') }}
+        <div class="dashboard__direction-content-wrapper">
+          <div class="dashboard__scroll-buttons">
+            <button class="dashboard__scroll-button dashboard__scroll-button--up" @click="scrollUp">
+              <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 18L14 11L7 18" stroke="#463B00" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <button class="dashboard__scroll-button dashboard__scroll-button--down" @click="scrollDown">
+              <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 11L14 18L21 11" stroke="#463B00" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
           </div>
-          <div class="statistic_blocks">
-            <div v-for="(stat, index) in statistics" :key="index" class="statistic_block" :class="`statistic_block--${stat.description_key}`">
-              <div class="statistic_block-title">{{ stat.title }}</div>
-              <div class="statistic_block-description">{{ t(`dashboard.statistics.${stat.description_key}`) }}</div>
+          <div class="dashboard__direction-directions" ref="coursesContainer">
+            <div
+                v-for="(course, index) in courses"
+                :key="index"
+                :class="['dashboard__course-block', { 'dashboard__course-block--locked': course.isLocked }]"
+            >
+              <div class="dashboard__course-block-content">
+                <h4 class="dashboard__course-block-title">{{ course.title }}</h4>
+                <div v-if="!course.isLocked" class="dashboard__course-block-details">
+                  <span class="dashboard__course-block-teacher">{{ course.teacher }}</span>
+                  <span class="dashboard__course-block-label">вчитель</span>
+                </div>
+                <div v-if="!course.isLocked" :class="['dashboard__course-block-progress', `dashboard__course-block-progress--${course.progressColor}`]">
+                  {{ course.progress }}/{{ course.total }}
+                </div>
+                <div v-else class="dashboard__course-block-lock-icon">
+                  🔒
+                </div>
+              </div>
             </div>
           </div>
         </div>
-        <div class="homework">
-          <div class="homework__title">{{ t('dashboard.homework.title') }}</div>
-          <div class="homework__items">
-            <div v-for="(homework, index) in homeworks" :key="index" class="homework__item" :class="{ 'homework__item--overdue': homework.isOverdue }">
-              <div class="name-student">{{ homework.studentName }}</div>
-              <div class="name-trainer">{{ homework.trainerName }}</div>
-              <div class="homework-date">{{ homework.date }}</div>
-            </div>
-          </div>
-          <router-link to="homework" class="button btn-watch-all">{{ t('dashboard.view_all') }}</router-link>
+      </div>
+      <div class="dashboard__column dashboard__column--notification-wrapper">
+        <div class="dashboard__notification">
+          У кожного є внутрішнє сонце. Дозвольте йому сяяти!
         </div>
       </div>
-      <div class="content-right">
-        <div class="upcoming-classes">
-          <div class="upcoming-classes__title">{{ t('dashboard.upcoming_classes.title') }}</div>
-          <div class="upcoming-classes__items">
-            <div v-for="(item, index) in upcomingClasses" :key="index" class="upcoming-classes__item">
-              <div class="upcoming-classes__item-name">{{ item.name }}</div>
-              <div class="upcoming-classes__item-date">{{ item.date }}</div>
-              <div class="upcoming-classes__item-icon"></div>
-            </div>
+      <div class="dashboard__column dashboard__column--coins-wrapper">
+        <div class="dashboard__coins">
+          <div class="dashboard__coins-icon">
+            <svg width="30" height="33" viewBox="0 0 30 33" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M15.4299 32.0846C12.339 32.0846 9.70604 31.4389 7.53095 30.1475C5.35587 28.8273 3.69594 27.005 2.55116 24.6804C1.40638 22.3271 0.833984 19.5864 0.833984 16.4583C0.833984 14.1337 1.1488 12.0243 1.77843 10.1302C2.43668 8.20741 3.38112 6.55724 4.61176 5.17971C5.87102 3.80218 7.40217 2.75468 9.2052 2.03721C11.0082 1.29105 13.0545 0.917969 15.3441 0.917969C17.6623 0.917969 19.7372 1.29105 21.5688 2.03721C23.4005 2.78338 24.9173 3.90262 26.1193 5.39495C27.35 6.85858 28.1513 8.69528 28.5234 10.9051H22.2986C22.0697 9.95802 21.6547 9.18316 21.0537 8.58049C20.4527 7.94912 19.6943 7.4756 18.7784 7.15991C17.8912 6.84423 16.8752 6.68639 15.7304 6.68639C14.1564 6.68639 12.8256 6.95902 11.738 7.50429C10.6505 8.04957 9.76328 8.79573 9.07641 9.74278C8.41816 10.6611 7.93163 11.723 7.61681 12.9283C7.33062 14.105 7.18752 15.3247 7.18752 16.5874C7.18752 18.3093 7.47372 19.9164 8.04611 21.4088C8.6185 22.8724 9.52001 24.0634 10.7507 24.9817C11.9813 25.8714 13.6126 26.3162 15.6446 26.3162C16.9897 26.3162 18.1774 26.1153 19.2077 25.7135C20.2666 25.2831 21.1109 24.6517 21.7406 23.8194C22.3988 22.9585 22.7709 21.9253 22.8567 20.72H14.5714V15.4251H29.1673V17.104C29.1673 20.2034 28.6522 22.8724 27.6219 25.1109C26.5916 27.3494 25.0604 29.0713 23.0284 30.2766C20.9964 31.482 18.4636 32.0846 15.4299 32.0846Z" fill="#D2BB3F"/>
+            </svg>
+          </div>
+          <div class="dashboard__coins-content">
+            <div class="dashboard__coins-content-number">93645</div>
+            <div class="dashboard__coins-content-text">баланс</div>
           </div>
         </div>
-        <router-link to="schedule" class="button btn-watch-all">{{ t('dashboard.view_all') }}</router-link>
       </div>
     </div>
   </div>
@@ -104,453 +154,267 @@ const { t } = useI18n();
 @use "@/assets/scss/mixins/mixins-media" as *;
 
 .dashboard {
-  .header {
+  padding: 20px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard__columns {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.dashboard__column {
+  min-width: 280px;
+  padding: 20px;
+  border-radius: 8px;
+
+  &--direction {
+    flex: 2;
+    background-color: transparent;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+  }
 
-    .welcome-message {
-      display: flex;
-      gap: 23px;
-      position: relative;
+  &--notification-wrapper,
+  &--coins-wrapper {
+    flex: 1;
+  }
+}
 
-      .text {
-        font-family: "Onest", sans-serif;
-        font-weight: 500;
-        font-size: 50px;
-        line-height: 115%;
-        letter-spacing: -2%;
-        color: #ffffff;
-      }
+.dashboard__direction-title {
+  font-family: "Onest", sans-serif;
+  font-weight: 500;
+  font-size: 60px;
+  line-height: 1.15;
+  letter-spacing: -2%;
+  color: #ffffff;
+  margin-bottom: 20px;
+  position: relative;
+}
 
-      .pencil-background {
-        position: absolute;
-        top: -133px;
-        right: -350px;
-        background-image: url("@/assets/backgrounds/pencil.svg");
-        background-size: contain;
-        background-position: center;
-        background-repeat: no-repeat;
-        width: 284px;
-        height: 243px;
-        display: none;
-      }
-    }
+.dashboard__direction-content-wrapper {
+  display: flex;
+  flex-grow: 1;
+  position: relative;
+}
 
-    .profile {
-      display: flex;
-      align-items: center;
-      gap: 20px;
+.dashboard__scroll-buttons {
+  position: absolute;
+  right: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 10;
+}
 
-      .notification-wrapper {
-        background-color: #ffffff;
-        padding: 18px;
-        border-radius: 18px;
+.dashboard__scroll-button {
+  background-color: #ffd700;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.2s ease;
 
-        .notification {
-          width: 32px;
-          height: 32px;
-          background-image: url('@/assets/images/icons/bell.png');
-          background-size: cover;
-          background-position: center;
-          background-repeat: no-repeat;
-        }
-      }
+  &:hover {
+    background-color: darken(#ffd700, 10%);
+  }
+  
+  svg {
+    padding-left: 3px;
+    padding-bottom: 3px;
+  }
+}
 
-      .profile-image {
-        width: 80px;
-        height: 80px;
-        background-image: url('@/assets/images/pages/dashboard/profile-logo.png');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-      }
+.dashboard__direction-directions {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  flex-grow: 1;
+  overflow-y: scroll;
+  max-height: calc(100vh - 250px);
+  padding-right: 50px;
+  box-sizing: border-box;
+  &::-webkit-scrollbar {
+    width: 0;
+    background: transparent;
+  }
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.dashboard__course-block {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+
+  &--locked {
+    background-color: #d1e7fd;
+    color: #000;
+    .dashboard__course-block-title {
+      color: #000;
     }
   }
 
-  .main {
+  &-content {
+    flex-grow: 1;
     display: flex;
-    gap: 20px;
-    margin-top: 60px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
 
-    .content-left {
-      flex: 2;
-      min-height: 400px;
-      border-radius: 12px;
+  &-title {
+    font-weight: bold;
+    font-size: 1.3em;
+    margin-bottom: 5px;
+    color: #333;
+  }
 
-      .statistic {
-        border-radius: 12px;
-        backdrop-filter: blur(12px);
-        background: #FFFFFF82;
-        border-radius: 28px;
-        padding: 24px;
-        max-height: 251px;
+  &-details {
+    font-size: 0.9em;
+    color: #777;
+    margin-bottom: 10px;
+  }
 
-        .statistic_title {
-          font-family: "Onest", sans-serif;
-          font-weight: 500;
-          font-size: 20px;
-          line-height: 100%;
-          letter-spacing: 0%;
-          color: #2C2C3A;
-        }
+  &-teacher {
+    margin-right: 5px;
+  }
 
-        .statistic_blocks {
-          margin-top: 24px;
-          display: flex;
-          gap: 16px;
-        }
+  &-progress {
+    font-weight: bold;
+    font-size: 1.2em;
 
-        .statistic_block {
-          background-color: #ffffff;
-          padding: 24px;
-          border-radius: 24px;
-          display: flex;
-          flex-direction: column;
-          gap: 18px;
-          width: 224px;
-
-          .statistic_block-title {
-            font-family: "Onest", sans-serif;
-            font-weight: 500;
-            font-size: 60px;
-            line-height: 100%;
-            letter-spacing: -2%;
-            color: #0066ff;
-          }
-
-          .statistic_block-description {
-            font-family: "Onest", sans-serif;
-            font-weight: 500;
-            font-size: 18px;
-            line-height: 100%;
-            letter-spacing: 0%;
-            color: #30303d;
-            opacity: 0.5;
-          }
-
-          &--students_count {
-            .statistic_block-title {
-              color: #0066FF;
-            }
-          }
-
-          &--homework_count {
-            .statistic_block-title {
-              color: #1FAC08;
-            }
-          }
-
-          &--lessons_count {
-            .statistic_block-title {
-              color: #FF7B7B;
-            }
-          }
-        }
-      }
-
-      .homework {
-        margin-top: 22px;
-        border-radius: 12px;
-        backdrop-filter: blur(12px);
-        background: #FFFFFF82;
-        border-radius: 28px;
-        padding: 24px;
-
-        .homework__title {
-          font-family: "Onest", sans-serif;
-          font-weight: 500;
-          font-size: 20px;
-          line-height: 100%;
-          letter-spacing: 0%;
-          color: #2C2C3A;
-          margin-bottom: 24px;
-        }
-
-        .homework__items {
-          display: flex;
-          gap: 16px;
-          flex-direction: column;
-          margin-top: 24px;
-          padding: 22px 24px 30px;
-          background-color: #f5f5f5;
-          border-radius: 24px;
-        }
-
-        .homework__item {
-          display: flex;
-          align-items: center;
-          gap: 16px;
-          border-radius: 12px;
-
-          .name-student {
-            flex: 1;
-            font-family: "Onest", sans-serif;
-            font-weight: 400;
-            font-size: 18px;
-            line-height: 100%;
-            letter-spacing: 0%;
-            color: #30303d;
-          }
-
-          .name-trainer {
-            flex: 1;
-            font-family: "Onest", sans-serif;
-            font-weight: 400;
-            font-size: 18px;
-            line-height: 100%;
-            letter-spacing: 0%;
-            text-align: center;
-            color: #30303d;
-          }
-
-          .homework-date {
-            flex: 1;
-            font-family: "Onest", sans-serif;
-            font-weight: 500;
-            font-size: 18px;
-            line-height: 121%;
-            letter-spacing: 0%;
-            color: #0066ff;
-            text-align: right;
-          }
-
-          &--overdue {
-            .name-student,
-            .name-trainer,
-            .homework-date {
-              color: #ff7b7b;
-            }
-          }
-        }
-      }
-
-      .btn-watch-all {
-        margin-top: 32px;
-      }
+    &--green {
+      color: #4CAF50;
     }
-
-    .content-right {
-      flex: 1;
-      min-height: 400px;
-      border-radius: 12px;
-      backdrop-filter: blur(12px);
-      background: #FFFFFF82;
-      border-radius: 28px;
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-
-      .upcoming-classes {
-        border-radius: 12px;
-
-        .upcoming-classes__title {
-          font-family: "Onest", sans-serif;
-          font-weight: 500;
-          font-size: 20px;
-          line-height: 100%;
-          letter-spacing: 0%;
-          color: #2C2C3A;
-          margin-bottom: 24px;
-        }
-
-        .upcoming-classes__items {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-        }
-
-        .upcoming-classes__item {
-          border-radius: 24px;
-          background-color: #ffffff;
-          padding: 16px;
-          display: flex;
-          align-items: center;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-
-          .upcoming-classes__item-name {
-            flex: 1;
-            font-family: "Onest", sans-serif;
-            font-weight: 400;
-            font-size: 18px;
-            line-height: 100%;
-            letter-spacing: 0%;
-            color: #30303d;
-          }
-
-          .upcoming-classes__item-date {
-            flex: 1;
-            font-family: "Onest", sans-serif;
-            font-weight: 500;
-            font-size: 18px;
-            line-height: 121%;
-            letter-spacing: 0%;
-            color: #0066ff;
-            text-align: center;
-          }
-
-          .upcoming-classes__item-icon {
-            cursor: pointer;
-            width: 24px;
-            height: 24px;
-            margin-left: 12px;
-            background-image: url('@/assets/images/icons/external-link.png');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-          }
-        }
-      }
-
-      .btn-watch-all {
-        width: 100%;
-        margin-top: 32px;
+    &--red {
+      color: #F44336;
     }
-  }}
+  }
+
+  &-lock-icon {
+    font-size: 2em;
+    color: #555;
+    margin-left: auto;
+  }
+}
+
+.dashboard__notification {
+  font-size: 22px;
+  padding: 20px;
+  background-color: #FFFFFF;
+  border-radius: 24px;
+  position: relative;
+  font-family: Onest;
+  font-weight: 400;
+  font-style: Regular;
+  line-height: 121%;
+  letter-spacing: 0%;
+
+
+  &:after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 10px solid #e0f7fa;
+  }
+}
+
+.dashboard__coins {
+  display: flex;
+  gap: 10px;
+  padding: 28px 32px;
+  background: #FF7B7B;
+  border-radius: 32px;
+
+  &-icon {
+    width: 40px;
+    height: 40px;
+    background: #FFDF39;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  &-content {
+    color: #FFFFFF;
+    &-number {
+      font-size: 40px;
+      font-weight: bold;
+      font-family: Onest;
+      font-weight: 400;
+      font-style: Regular;
+      line-height: 121%;
+      letter-spacing: 0%;
+
+    }
+    &-text {
+      font-family: Onest;
+      font-weight: 400;
+      font-style: Regular;
+      font-size: 16px;
+      leading-trim: NONE;
+      line-height: 121%;
+      letter-spacing: 0%;
+      opacity: 0.5;
+    }
+  }
 }
 
 @include media-max(desktop) {
   .dashboard {
     padding: 32px;
+  }
+  .dashboard__columns {
+    gap: 16px;
 
-    .main  {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .header {
-      .welcome-message {
-        .text {
-          font-family: "Onest", sans-serif;
-          font-size: 40px;
-        }
-      }
-
-      .profile {
-        .notification-wrapper {
-          .notification {
-            /* Font not applicable */
-          }
-        }
-
-        .profile-image {
-          /* Font not applicable */
-        }
+    .dashboard__column {
+      &--direction,
+      &--notification-wrapper,
+      &--coins-wrapper {
+        flex: 1;
       }
     }
+  }
+}
 
-    .content-left {
-      .statistic {
-        .statistic_title {
-          font-family: "Onest", sans-serif;
-          font-size: 20px;
-        }
-
-        .statistic_blocks {
-          .statistic_block {
-            .statistic_block-title {
-              font-family: "Onest", sans-serif;
-              font-size: 44px;
-            }
-
-            .statistic_block-description {
-              font-family: "Onest", sans-serif; /* Update font here */
-              font-size: 16px; /* Adjust as needed */
-            }
-
-            &--students_count {
-              .statistic_block-title {
-                font-family: "Onest", sans-serif; /* Update font here */
-              }
-            }
-
-            &--homework_count {
-              .statistic_block-title {
-                font-family: "Onest", sans-serif; /* Update font here */
-              }
-            }
-
-            &--lessons_count {
-              .statistic_block-title {
-                font-family: "Onest", sans-serif; /* Update font here */
-              }
-            }
-          }
-        }
-      }
-
-      .homework {
-        .homework__title {
-          font-family: "Onest", sans-serif; /* Update font here */
-          font-size: 18px; /* Adjust as needed */
-        }
-
-        .homework__items {
-          .homework__item {
-            .name-student {
-              font-family: "Onest", sans-serif; /* Update font here */
-              font-size: 16px; /* Adjust as needed */
-            }
-
-            .name-trainer {
-              font-family: "Onest", sans-serif; /* Update font here */
-              font-size: 16px; /* Adjust as needed */
-            }
-
-            .homework-date {
-              font-family: "Onest", sans-serif; /* Update font here */
-              font-size: 16px; /* Adjust as needed */
-            }
-
-            &--overdue {
-              .name-student,
-              .name-trainer,
-              .homework-date {
-                font-family: "Onest", sans-serif; /* Update font here */
-              }
-            }
-          }
-        }
-
-        .btn-watch-all {
-          font-family: "Onest", sans-serif; /* Update font here */
-          font-size: 16px; /* Adjust as needed */
-        }
-      }
-    }
-
-    .content-right {
-      .upcoming-classes {
-        .upcoming-classes__title {
-          font-family: "Onest", sans-serif; /* Update font here */
-          font-size: 18px; /* Adjust as needed */
-        }
-
-        .upcoming-classes__items {
-          .upcoming-classes__item {
-            .upcoming-classes__item-name {
-              font-family: "Onest", sans-serif; /* Update font here */
-              font-size: 16px; /* Adjust as needed */
-            }
-
-            .upcoming-classes__item-date {
-              font-family: "Onest", sans-serif; /* Update font here */
-              font-size: 16px; /* Adjust as needed */
-            }
-
-            .upcoming-classes__item-icon {
-              /* Font not applicable */
-            }
-          }
-        }
-      }
-
-      .btn-watch-all {
-        font-family: "Onest", sans-serif; /* Update font here */
-        font-size: 16px; /* Adjust as needed */
-      }
-    }
+@include media-max(tablet) {
+  .dashboard__column {
+    flex-basis: 100%;
+  }
+  .dashboard__direction-directions {
+    max-height: 400px;
+    padding-right: 0;
+  }
+  .dashboard__scroll-buttons {
+    position: static;
+    flex-direction: row;
+    justify-content: center;
+    margin-bottom: 10px;
   }
 }
 </style>
