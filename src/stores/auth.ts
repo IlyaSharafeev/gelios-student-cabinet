@@ -50,7 +50,7 @@ export const useAuthStore = defineStore('auth', {
 
         async login({email, password}) {
             try {
-                const response = await axios.post(`${baseURL}/api/auth/sign-in`, {
+                const response = await axios.post(`${baseURL}/api/auth/student/sign-in`, {
                     email,
                     password,
                 });
