@@ -45,20 +45,29 @@ const showBackgroundElements = computed(() => {
                     />
                   </router-link>
                 </li>
-                <li>
-                  <router-link to="/add-homework" class="sidebar-link">
-                    <img
-                        src="@/assets/images/sidebar/add-homework.svg"
-                        alt="homework"
-                        class="sidebar-icon"
-                    />
-                  </router-link>
-                </li>
+<!--                <li>-->
+<!--                  <router-link to="/add-homework" class="sidebar-link">-->
+<!--                    <img-->
+<!--                        src="@/assets/images/sidebar/add-homework.svg"-->
+<!--                        alt="homework"-->
+<!--                        class="sidebar-icon"-->
+<!--                    />-->
+<!--                  </router-link>-->
+<!--                </li>-->
                 <li>
                   <router-link to="/students" class="sidebar-link">
                     <img
                         src="@/assets/images/sidebar/students.svg"
                         alt="students"
+                        class="sidebar-icon"
+                    />
+                  </router-link>
+                </li>
+                <li>
+                  <router-link to="/games" class="sidebar-link">
+                    <img
+                        src="@/assets/images/sidebar/gamepad.svg"
+                        alt="gamess"
                         class="sidebar-icon"
                     />
                   </router-link>
@@ -122,20 +131,29 @@ const showBackgroundElements = computed(() => {
                   />
                 </router-link>
               </li>
-              <li>
-                <router-link to="/add-homework" class="sidebar-link">
-                  <img
-                      src="@/assets/images/sidebar/add-homework.svg"
-                      alt="homework"
-                      class="sidebar-icon"
-                  />
-                </router-link>
-              </li>
+<!--              <li>-->
+<!--                <router-link to="/add-homework" class="sidebar-link">-->
+<!--                  <img-->
+<!--                      src="@/assets/images/sidebar/add-homework.svg"-->
+<!--                      alt="homework"-->
+<!--                      class="sidebar-icon"-->
+<!--                  />-->
+<!--                </router-link>-->
+<!--              </li>-->
               <li>
                 <router-link to="/students" class="sidebar-link">
                   <img
                       src="@/assets/images/sidebar/students.svg"
                       alt="students"
+                      class="sidebar-icon"
+                  />
+                </router-link>
+              </li>
+              <li>
+                <router-link to="/games" class="sidebar-link">
+                  <img
+                      src="@/assets/images/sidebar/gamepad.svg"
+                      alt="gamess"
                       class="sidebar-icon"
                   />
                 </router-link>

@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import GamesPage from '@/pages/GamesPage.vue';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -26,6 +27,18 @@ const router = createRouter({
           path: 'homework',
           name: 'homework',
           component: () => import('@/pages/HomeworkPage.vue'),
+        },
+        {
+          path: 'games',
+          name: 'games-grid', // Переименовываем для ясности
+          component: GamesPage,
+          children: [ // Добавляем дочерний роут
+            {
+              path: ':trainerSlug',
+              name: 'game-view',
+              component: GamesPage, // Тот же компонент будет обрабатывать и игру
+            }
+          ]
         },
         {
           path: 'add-homework',
@@ -56,18 +69,6 @@ const router = createRouter({
         }
       },
     },
-    // {
-    //   path: '/register',
-    //   name: 'register',
-    //   component: () => import('@/pages/RegisterPage.vue'),
-    //   beforeEnter: (to, from, next) => {
-    //     if (localStorage.token) {
-    //       next('/');
-    //     } else {
-    //       next();
-    //     }
-    //   },
-    // },
     {
       path: '/reset-password',
       name: 'reset-password',
