@@ -1,0 +1,44 @@
+.button {
+  padding: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #0066FF;
+  color: #FFFFFF;
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  border-radius: 16px;
+  cursor: pointer;
+}
+
+.rounded-button {
+  border: 1.5px solid #0066FF;
+  background-color: #f4f4f4;
+  color: #0066FF;
+}
+
+.arrow-left {
+  background-image: url("@/assets/arrows/arrow-left.svg");
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 24px;
+  height: 24px;
+  margin-right: 8px;
+}
+
+.arrow-right {
+  background-image: url("@/assets/arrows/arrow-right.svg");
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 24px;
+  height: 24px;
+  margin-left: 8px;
+}
+
+.large-button {
+  width: 250px;
+}

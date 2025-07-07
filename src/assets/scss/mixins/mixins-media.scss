@@ -1,0 +1,42 @@
+@use "sass:map";
+
+// Breakpoints для адаптивного дизайна
+$breakpoints: (
+        mobile: 390px,
+        tablet: 768px,
+        desktop: 1280px,
+        large-desktop: 1440px
+);
+
+// Миксин для медиа-запросов (max-width)
+@mixin media-max($breakpoint) {
+  @if map.has-key($breakpoints, $breakpoint) {
+    @media (max-width: #{map.get($breakpoints, $breakpoint)}) {
+      @content;
+    }
+  } @else {
+    @warn "Breakpoint '#{$breakpoint}' not found in $breakpoints map.";
+  }
+}
+
+// Миксин для медиа-запросов (min-width)
+@mixin media-min($breakpoint) {
+  @if map.has-key($breakpoints, $breakpoint) {
+    @media (min-width: #{map.get($breakpoints, $breakpoint)}) {
+      @content;
+    }
+  } @else {
+    @warn "Breakpoint '#{$breakpoint}' not found in $breakpoints map.";
+  }
+}
+
+// Миксин для медиа-запросов в диапазоне (min-width и max-width)
+@mixin media-between($min-breakpoint, $max-breakpoint) {
+  @if map.has-key($breakpoints, $min-breakpoint) and map.has-key($breakpoints, $max-breakpoint) {
+    @media (min-width: #{map.get($breakpoints, $min-breakpoint)}) and (max-width: #{map.get($breakpoints, $max-breakpoint)}) {
+      @content;
+    }
+  } @else {
+    @warn "One or both breakpoints ('#{$min-breakpoint}', '#{$max-breakpoint}') not found in $breakpoints map.";
+  }
+}

@@ -1,0 +1,32 @@
+.v-field__input {
+  --v-field-padding-start: 16px;
+  --v-field-padding-start: 16px;
+  --v-field-padding-end: 16px;
+  --v-field-input-padding-top: 0px;
+  --v-field-input-padding-bottom: 0px;
+  --v-high-emphasis-opacity: 0.87;
+  --v-input-control-height: 44px;
+}
+
+.v-field__control {
+  border-radius: 12px;
+}
+
+.v-field__field {
+  height: 44px;
+}
+
+
+.dp__input {
+  border: 1.5px solid #30303D26 !important;
+  border-radius: 12px !important;
+  display: flex !important;
+  height: 44px;
+}
+
+.v-field__append-inner {
+  --v-field-padding-top: 0px;
+  --v-input-padding-top: 0px;
+  align-items: center !important;
+  padding-right: 10px;
+}
