@@ -18,7 +18,7 @@ export const useAuthStore = defineStore('auth', {
         async register({email, username, contactNumber, password}) {
             console.log({email, username, contactNumber, password});
             try {
-                const response = await axios.post('/api/auth/student/register', {
+                const response = await axios.post(`${baseURL}/api/auth/student/register`, {
                         email,
                         firstName: username,
                         lastName: username,
