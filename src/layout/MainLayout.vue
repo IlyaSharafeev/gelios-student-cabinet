@@ -1,9 +1,95 @@
 <script setup lang="ts">
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
+
+const route = useRoute();
+
+const showBackgroundElements = computed(() => {
+  return route.path === '/dashboard';
+});
 </script>
 
 <template>
   <div class="layout">
-    <div class="buildings">
+    <div class="buildings" v-if="showBackgroundElements">
+      <div class="cloudes" v-if="showBackgroundElements">
+        <div class="sidebar-wrapper">
+          <aside class="sidebar">
+            <nav>
+              <div class="logo-mobile"></div>
+              <ul>
+                <li>
+                  <router-link to="/dashboard" class="sidebar-link">
+                    <img
+                        src="@/assets/images/sidebar/dashboard.svg"
+                        alt="Dashboard"
+                        class="sidebar-icon"
+                    />
+                  </router-link>
+                </li>
+                <li>
+                  <router-link to="/schedule" class="sidebar-link">
+                    <img
+                        src="@/assets/images/sidebar/calendar.svg"
+                        alt="schedule"
+                        class="sidebar-icon"
+                    />
+                  </router-link>
+                </li>
+                <li>
+                  <router-link to="/homework" class="sidebar-link">
+                    <img
+                        src="@/assets/images/sidebar/homework.svg"
+                        alt="homework"
+                        class="sidebar-icon"
+                    />
+                  </router-link>
+                </li>
+                <li>
+                  <router-link to="/add-homework" class="sidebar-link">
+                    <img
+                        src="@/assets/images/sidebar/add-homework.svg"
+                        alt="homework"
+                        class="sidebar-icon"
+                    />
+                  </router-link>
+                </li>
+                <li>
+                  <router-link to="/students" class="sidebar-link">
+                    <img
+                        src="@/assets/images/sidebar/students.svg"
+                        alt="students"
+                        class="sidebar-icon"
+                    />
+                  </router-link>
+                </li>
+                <li>
+                  <router-link to="/settings" class="sidebar-link">
+                    <img
+                        src="@/assets/images/sidebar/settings.svg"
+                        alt="students"
+                        class="sidebar-icon"
+                    />
+                  </router-link>
+                </li>
+              </ul>
+            </nav>
+          </aside>
+
+          <aside class="logo-wrapper">
+            <div class="logo"></div>
+          </aside>
+        </div>
+
+        <main class="content">
+          <router-view />
+        </main>
+
+        <div class="characters" v-if="showBackgroundElements"></div>
+      </div>
+    </div>
+    <div v-else class="content-only">
+
       <div class="sidebar-wrapper">
         <aside class="sidebar">
           <nav>
@@ -71,12 +157,10 @@
           <div class="logo"></div>
         </aside>
       </div>
-
+      
       <main class="content">
         <router-view />
       </main>
-
-      <div class="characters"></div>
     </div>
   </div>
 </template>
@@ -86,7 +170,6 @@
 
 .layout {
   display: flex;
-  //background-image: url('@/assets/backgrounds/dashboard.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -113,13 +196,23 @@
   background-position: center;
   background-repeat: no-repeat;
   /* Использование vw и vh для ширины и высоты */
-  width: 40vw; /* Пример: 40% от ширины вьюпорта */
+  width: 50vw; /* Пример: 40% от ширины вьюпорта */
   height: 70vh; /* Пример: 70% от высоты вьюпорта */
   position: absolute;
   /* Позиционирование относительно вьюпорта */
   right: -5vw; /* Пример: -5% от ширины вьюпорта */
   bottom: -20vh; /* Пример: -20% от высоты вьюпорта */
   transform: translateY(0px);
+}
+
+.cloudes {
+  position: relative;
+  background: url('@/assets/backgrounds/cloudes.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 100%;
+  height: 100vh;
 }
 
 
@@ -168,9 +261,13 @@
 }
 
 .content {
-  margin-left: 214px;
-  margin-top: 65px;
-  width: calc(100% - 270px);
+  padding-left: 214px;
+  width: calc(100% - 100px);
+}
+
+.content-only {
+  width: 100%;
+  padding-top: 65px;
 }
 
 .logo-wrapper {
