@@ -343,6 +343,7 @@ const showBackgroundElements = computed(() => {
 
   .content {
     margin: 0;
+    padding: 0;
     margin-bottom: 120px;
     margin-left: 0;
     width: 100%;

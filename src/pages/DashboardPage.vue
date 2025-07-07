@@ -144,18 +144,22 @@ onMounted(() => {
                 :key="index"
                 :class="['dashboard__course-block', { 'dashboard__course-block--locked': course.isLocked }]"
             >
-              <div class="dashboard__course-block-content">
+              <div class="dashboard__course-block-content" :class="{'dashboard__course-block-content--locked': course.isLocked}">
                 <h4 class="dashboard__course-block-title">{{ course.title }}</h4>
-                <div v-if="!course.isLocked" class="dashboard__course-block-details">
-                  <span class="dashboard__course-block-teacher">{{ course.teacher }}</span>
-                  <span class="dashboard__course-block-label">{{ t('dashboard.teacher_label') }}</span>
-                </div>
-                <div v-if="!course.isLocked"
-                     :class="['dashboard__course-block-progress', `dashboard__course-block-progress--${course.progressColor}`]">
-                  {{ course.progress }}/{{ course.total }}
+                <div v-if="!course.isLocked" class="dashboard__course-block-details-wrapper">
+                  <div class="dashboard__course-block-details">
+                    <span class="dashboard__course-block-teacher">{{ course.teacher }}</span>
+                    <span class="dashboard__course-block-label">{{ t('dashboard.teacher_label') }}</span>
+                  </div>
+                  <div
+                       :class="['dashboard__course-block-progress', `dashboard__course-block-progress--${course.progressColor}`]">
+                    {{ course.progress }}/{{ course.total }}
+                  </div>
                 </div>
                 <div v-else class="dashboard__course-block-lock-icon">
-                  🔒
+                  <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M28.3337 16.6667V13.3333C28.3337 8.73096 24.6027 5 20.0003 5C15.398 5 11.667 8.73096 11.667 13.3333V16.6667M20.0003 24.1667V27.5M14.667 35H25.3337C28.1339 35 29.5341 35 30.6036 34.455C31.5444 33.9757 32.3093 33.2108 32.7887 32.27C33.3337 31.2004 33.3337 29.8003 33.3337 27V24.6667C33.3337 21.8664 33.3337 20.4663 32.7887 19.3967C32.3093 18.4559 31.5444 17.691 30.6036 17.2116C29.5341 16.6667 28.1339 16.6667 25.3337 16.6667H14.667C11.8667 16.6667 10.4666 16.6667 9.39704 17.2116C8.45623 17.691 7.69133 18.4559 7.21196 19.3967C6.66699 20.4663 6.66699 21.8664 6.66699 24.6667V27C6.66699 29.8003 6.66699 31.2004 7.21196 32.27C7.69133 33.2108 8.45623 33.9757 9.39704 34.455C10.4666 35 11.8667 35 14.667 35Z" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
                 </div>
               </div>
             </div>
@@ -289,9 +293,16 @@ onMounted(() => {
   -ms-overflow-style: none;
 }
 
+.dashboard__course-block-details-wrapper {
+  display: flex;
+  gap: 31px;
+  justify-content: space-between;
+  width: 100%;
+}
+
 .dashboard__course-block {
   background-color: #ffffff;
-  border-radius: 12px;
+  border-radius: 28px;
   padding: 20px;
   display: flex;
   justify-content: space-between;
@@ -299,19 +310,27 @@ onMounted(() => {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
 
   &--locked {
-    background-color: #d1e7fd;
-    color: #000;
-
+    background: #3968BD80;
+    color: #FFFFFF;
+    opacity: 70%;
+    backdrop-filter: blur(20px);
+    
     .dashboard__course-block-title {
-      color: #000;
+      color: #FFFFFF;
     }
   }
 
   &-content {
     flex-grow: 1;
     display: flex;
+    gap: 24px;
     flex-direction: column;
     align-items: flex-start;
+    
+    &--locked {
+      flex-direction: row;
+      align-items: center;
+    }
   }
 
   &-title {
@@ -319,21 +338,50 @@ onMounted(() => {
     font-size: 1.3em;
     margin-bottom: 5px;
     color: #333;
+    font-family: Onest;
+    font-weight: 500;
+    font-size: 24px;
+    line-height: 105%;
+    letter-spacing: 0%;
   }
 
   &-details {
     font-size: 0.9em;
     color: #777;
     margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
   }
 
   &-teacher {
     margin-right: 5px;
+    color: #30303D;
+    font-family: Onest;
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 14px;
+    line-height: 100%;
+    letter-spacing: 0%;
+  }
+  
+  &-label {
+    opacity: 70%;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 100%;
+    letter-spacing: 0%;
   }
 
   &-progress {
     font-weight: bold;
-    font-size: 1.2em;
+    font-family: Onest;
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 28px;
+    line-height: 121%;
+    letter-spacing: 0%;
+
 
     &--green {
       color: #4CAF50;
