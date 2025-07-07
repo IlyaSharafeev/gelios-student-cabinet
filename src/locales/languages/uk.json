@@ -186,5 +186,8 @@
   "students_page.completed": "Виконано",
   "students_page.not_completed": "Не виконано",
   "students_page.skills_title": "Навички",
-  "add_homework.ready": "Готово"
+  "add_homework.ready": "Готово",
+  "dashboard.teacher_label": "вчитель",
+  "dashboard.quote": "У кожного є внутрішнє сонце. Дозвольте йому сяяти!",
+  "dashboard.balance": "баланс"
 }

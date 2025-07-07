@@ -100,7 +100,7 @@ onMounted(() => {
   <div class="dashboard">
     <div class="dashboard__columns">
       <div class="dashboard__column dashboard__column--direction">
-        <div class="dashboard__direction-title" data-aos="fade-right"> Доброго ранку, Остап
+        <div class="dashboard__direction-title" data-aos="fade-right"> {{ t('dashboard.greeting') }}, Остап
         </div>
         <div class="dashboard__direction-content-wrapper">
           <div class="dashboard__scroll-buttons">
@@ -125,7 +125,7 @@ onMounted(() => {
                 <h4 class="dashboard__course-block-title">{{ course.title }}</h4>
                 <div v-if="!course.isLocked" class="dashboard__course-block-details">
                   <span class="dashboard__course-block-teacher">{{ course.teacher }}</span>
-                  <span class="dashboard__course-block-label">вчитель</span>
+                  <span class="dashboard__course-block-label">{{ t('dashboard.teacher_label') }}</span>
                 </div>
                 <div v-if="!course.isLocked" :class="['dashboard__course-block-progress', `dashboard__course-block-progress--${course.progressColor}`]">
                   {{ course.progress }}/{{ course.total }}
@@ -139,7 +139,7 @@ onMounted(() => {
         </div>
       </div>
       <div class="dashboard__column dashboard__column--notification-wrapper">
-        <div class="dashboard__notification" data-aos="zoom-in" data-aos-delay="200"> У кожного є внутрішнє сонце. Дозвольте йому сяяти!
+        <div class="dashboard__notification" data-aos="zoom-in" data-aos-delay="200"> {{ t('dashboard.quote') }}
         </div>
       </div>
       <div class="dashboard__column dashboard__column--coins-wrapper">
@@ -150,7 +150,7 @@ onMounted(() => {
         </div>
           <div class="dashboard__coins-content">
             <div class="dashboard__coins-content-number">93645</div>
-            <div class="dashboard__coins-content-text">баланс</div>
+            <div class="dashboard__coins-content-text">{{ t('dashboard.balance') }}</div>
           </div>
         </div>
       </div>
@@ -237,7 +237,6 @@ onMounted(() => {
   }
 
   svg {
-    padding-left: 3px;
     padding-bottom: 3px;
   }
 }

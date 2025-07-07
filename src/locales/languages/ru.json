@@ -148,5 +148,8 @@
   "add_homework.trainers.find_cybercat": "Знайди киберкота",
   "add_homework.trainers.mnemonics": "Мнемотехника",
   "add_homework.trainers.columns": "Столбцы",
-  "add_homework.ready": "Готово"
+  "add_homework.ready": "Готово",
+  "dashboard.teacher_label": "учитель",
+  "dashboard.quote": "У каждого есть внутреннее солнце. Позвольте ему сиять!",
+  "dashboard.balance": "баланс"
 }
