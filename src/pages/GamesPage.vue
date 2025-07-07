@@ -135,6 +135,10 @@ watch(
 <style scoped>
 @import '@/assets/scss/mixins/mixins-media.scss';
 
+.games-page {
+  padding-bottom: 50px;
+}
+
 .page-title {
   font-weight: 500;
   font-size: 32px;
