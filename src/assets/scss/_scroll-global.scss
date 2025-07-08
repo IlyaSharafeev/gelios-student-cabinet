@@ -1,0 +1,30 @@
+/* Overall style for the scrollbar */
+::-webkit-scrollbar {
+  width: 10px; /* Width for vertical scrollbar */
+  height: 10px; /* Height for horizontal scrollbar */
+  background-color: transparent; /* Makes the scrollbar background transparent, as per your screenshot */
+}
+
+/* Style for the scrollbar track (the groove where the thumb slides) */
+::-webkit-scrollbar-track {
+  background-color: rgba(0, 0, 0, 0.1); /* Light semi-transparent background for the track */
+  border-radius: 5px; /* Rounded corners for the track */
+}
+
+/* Style for the scrollbar thumb (the draggable handle) */
+::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.3); /* Color of the thumb, can be darker or lighter */
+  border-radius: 5px; /* Rounded corners for the thumb */
+  border: 2px solid transparent; /* Add a transparent border to make the thumb slightly smaller and appear "inset" */
+  background-clip: padding-box; /* Important: ensures the border does not affect the inner background */
+}
+
+/* Style for the scrollbar thumb on hover */
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.5); /* Darker on hover */
+}
+
+/* Optional: Style for the scrollbar corner (where vertical and horizontal scrollbars meet) */
+::-webkit-scrollbar-corner {
+  background-color: transparent;
+}
