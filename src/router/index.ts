@@ -24,22 +24,22 @@ const router = createRouter({
           component: () => import('@/pages/SchedulePage.vue'),
         },
         {
-          path: 'homework',
+          path: 'homework/:tab?', // Modified line
           name: 'homework',
           component: () => import('@/pages/HomeworkPage.vue'),
         },
-        // {
-        //   path: 'games',
-        //   name: 'games-grid', // Переименовываем для ясности
-        //   component: GamesPage,
-        //   children: [ // Добавляем дочерний роут
-        //     {
-        //       path: ':trainerSlug',
-        //       name: 'game-view',
-        //       component: GamesPage, // Тот же компонент будет обрабатывать и игру
-        //     }
-        //   ]
-        // },
+        {
+          path: 'games',
+          name: 'games-grid',
+          component: GamesPage,
+          children: [
+            {
+              path: ':trainerSlug',
+              name: 'game-view',
+              component: GamesPage,
+            }
+          ]
+        },
         {
           path: 'add-homework',
           name: 'add-homework',
@@ -102,17 +102,7 @@ router.beforeEach((to, from, next) => {
     if (!token) {
       next({ name: 'login' });
     } else {
-      try {
-        if (token === 'invalid' || !token) {
-          localStorage.removeItem('token');
-          next({ name: 'login' });
-        } else {
-          next();
-        }
-      } catch (error) {
-        localStorage.removeItem('token');
-        next({ name: 'login' });
-      }
+      next();
     }
   } else {
     next();

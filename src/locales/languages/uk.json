@@ -191,5 +191,8 @@
   "add_homework.ready": "Готово",
   "dashboard.teacher_label": "вчитель",
   "dashboard.quote": "У кожного є внутрішнє сонце. Дозвольте йому сяяти!",
-  "dashboard.balance": "баланс"
+  "dashboard.balance": "баланс",
+  "tabs.classes": "Заняття",
+  "tabs.homeworks": "Домашня робота",
+  "tabs.materials": "Матеріали"
 }

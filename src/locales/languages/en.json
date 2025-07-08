@@ -190,5 +190,8 @@
   "add_homework.ready": "Ready",
   "dashboard.teacher_label": "teacher",
   "dashboard.quote": "Everyone has an inner sun. Let it shine!",
-  "dashboard.balance": "balance"
+  "dashboard.balance": "balance",
+  "tabs.classes": "Занятия",
+  "tabs.homeworks": "Занятия",
+  "tabs.materials": "Занятия"
 }
