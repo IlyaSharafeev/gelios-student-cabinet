@@ -410,7 +410,7 @@ const getTimeBarColorClass = (homework: Homework) => {
   gap: 15px;
   max-height: 520px;
   overflow-y: auto;
-  padding-right: 10px; /* Keep this for scrollbar spacing if needed, but box-sizing on item should prevent overlap */
+  padding-right: 10px;
 }
 
 .homework-item {
@@ -423,7 +423,7 @@ const getTimeBarColorClass = (homework: Homework) => {
   position: relative;
   overflow: hidden;
   min-height: 92px;
-  box-sizing: border-box; /* Ensures padding is included in the element's total width/height */
+  box-sizing: border-box;
 
   &:nth-child(odd) {
     background-image: linear-gradient(to right, #e0f7fa, #ffffff);
@@ -471,20 +471,20 @@ const getTimeBarColorClass = (homework: Homework) => {
 .homework-grid {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr; /* Two columns for time and rewards */
-  gap: 30px; /* Space between time and rewards sections */
+  gap: 70px; /* Space between time and rewards sections */
   align-items: center; /* Align items to the top of their cells */
-  width: calc(100% - 60px); /* Adjust width to make space for the button */
+  width: calc(100% - 20px); /* Adjust width to make space for the button */
 }
 
 .homework-time {
   display: flex;
-  flex-direction: column; /* Stack "Час на ..." and value vertically */
+  flex-direction: column;
   align-items: flex-start;
   font-size: 0.9em;
   color: #555;
   position: relative;
-  width: 100%; /* Take full width of its grid cell */
-  
+  width: 100%;
+
   &-title {
     font-family: Onest;
     font-weight: 500;
@@ -498,25 +498,27 @@ const getTimeBarColorClass = (homework: Homework) => {
 
 .homework-time-title-progress-bar-wrapper {
   display: flex;
-  flex-direction: row;
+  flex-direction: row; /* Changed to row to place items side-by-side */
+  align-items: center; /* Vertically align items in the row */
+  gap: 10px; /* Add space between the time value and the bar */
+  width: 100%; // Ensure it takes full width of its parent to manage internal spacing
 }
 
 .time-value {
   font-weight: bold;
   color: #000;
-  margin-top: 2px; /* Small space between label and value */
+  margin-top: 2px;
   display: flex;
+  flex-shrink: 0; /* Prevent the time value from shrinking */
 }
 
 .time-bar {
-  display: flex;
-  position: absolute;
-  bottom: -5px;
-  left: 0;
-  width: 100%; /* Ensure bar covers the full width of the time container */
+  flex-grow: 1; /* Allow the bar to take up available space */
   height: 5px;
   border-radius: 3px;
-  background-color: #ddd;
+  background-color: #ddd; /* This will be the background of the *full* bar length */
+  overflow: hidden; /* Important for clipping the inner colored bar if it exceeds 100% */
+  position: relative; /* Needed if you were to have an inner div for the progress */
 
   &.blue-bar {
     background-color: #2196F3;
@@ -531,10 +533,10 @@ const getTimeBarColorClass = (homework: Homework) => {
   font-size: 0.9em;
   color: #555;
   display: flex;
-  flex-direction: column; /* Stack "Винагороди" and value vertically */
+  flex-direction: column;
   align-items: flex-start;
   gap: 4px;
-  
+
   &-title {
     font-family: Onest;
     font-weight: 500;
@@ -568,7 +570,6 @@ const getTimeBarColorClass = (homework: Homework) => {
   border-radius: 8px;
   color: #ffffff;
 
-
   &.blue {
     background-color: #0066FF;
     &:hover {
@@ -593,7 +594,7 @@ const getTimeBarColorClass = (homework: Homework) => {
   display: flex;
   justify-content: center;
   align-items: center;
-  
+
   svg {
     width: 12px;
     height: 12px;
