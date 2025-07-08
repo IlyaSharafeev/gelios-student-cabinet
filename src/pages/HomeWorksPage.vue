@@ -74,8 +74,8 @@ const getTrainerInfo = (name: string) => {
   };
 };
 
-// Current date for setting due dates relative to now
-const now = new Date('2025-07-08T17:31:00Z'); // Hardcoded current time for consistent results based on prompt context
+// Current date for setting due dates relative to now - now dynamically calculated
+const now = new Date();
 
 const homeworks = ref<Homework[]>([
   {
@@ -231,40 +231,36 @@ const homeworks = ref<Homework[]>([
   // Example of an already accepted homework
   {
     id: 16,
-    title: 'Знайди пару',
+    title: 'Тест швидкості читання', // Changed from Знайди пару to match screenshot
     initialType: 'accept',
     currentType: 'perform', // Already accepted
     createdAt: new Date(now.getTime() - 10 * 60 * 60 * 1000).toISOString(), // Assigned 10 hours ago
     dueDate: new Date(now.getTime() - 1 * 60 * 60 * 1000).toISOString(), // Was due 1 hour ago (for overdue example)
     acceptedAt: new Date(now.getTime() - 8 * 60 * 60 * 1000).toISOString(), // Accepted 8 hours ago
     rewards: 32,
-    ...getTrainerInfo('Знайди пару'),
+    ...getTrainerInfo('Тест швидкості читання'),
   },
 ]);
 
 const formatTimeRemaining = (ms: number): string => {
-  if (ms < 0) {
-    ms = Math.abs(ms);
-    const seconds = Math.floor(ms / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
-
-    if (days > 0) return `Прострочено на ${days} дні(в)`;
-    if (hours > 0) return `Прострочено на ${hours} годи(н)`;
-    if (minutes > 0) return `Прострочено на ${minutes} хвили(н)`;
-    return `Прострочено на ${seconds} секунди(н)`;
-  }
-
-  const seconds = Math.floor(ms / 1000);
+  const absoluteMs = Math.abs(ms);
+  const seconds = Math.floor(absoluteMs / 1000);
   const minutes = Math.floor(seconds / 60);
   const hours = Math.floor(minutes / 60);
   const days = Math.floor(hours / 24);
 
-  if (days > 0) return `Залишилось ${days} дні(в)`;
-  if (hours > 0) return `Залишилось ${hours} годи(н)`;
-  if (minutes > 0) return `Залишилось ${minutes} хвили(н)`;
-  return `Залишилось ${seconds} секунди(н)`;
+  let result = '';
+  if (days > 0) {
+    result = `${days} дні(в)`;
+  } else if (hours > 0) {
+    result = `${hours} годи(н)`;
+  } else if (minutes > 0) {
+    result = `${minutes} хвили(н)`;
+  } else {
+    result = `${seconds} секунди(н)`;
+  }
+
+  return ms < 0 ? `${result}` : `${result}`;
 };
 
 const calculateTimeRemaining = (isoDueDateString: string) => {
@@ -273,29 +269,21 @@ const calculateTimeRemaining = (isoDueDateString: string) => {
   return dueDate.getTime() - now.getTime();
 };
 
-const calculateTimeSinceAcceptance = (isoAcceptedAtString: string) => {
-  const now = new Date();
-  const acceptedAt = new Date(isoAcceptedAtString);
-  return now.getTime() - acceptedAt.getTime();
-};
-
 const timers = ref<{ [key: number]: string }>({});
 let interval: number;
 
 const updateTimers = () => {
   homeworks.value.forEach(hw => {
-    if (hw.acceptedAt) {
-      timers.value[hw.id] = `Прийнято: ${formatTimeRemaining(-calculateTimeSinceAcceptance(hw.acceptedAt))}`; // Display how long ago it was accepted
-    } else {
-      timers.value[hw.id] = formatTimeRemaining(calculateTimeRemaining(hw.dueDate));
-    }
+    timers.value[hw.id] = formatTimeRemaining(calculateTimeRemaining(hw.dueDate));
   });
 };
 
 const handleHomeworkAction = (homework: Homework) => {
   if (homework.currentType === 'accept') {
-    // Logic for accepting homework
-    homework.acceptedAt = new Date().toISOString();
+    const acceptanceTime = new Date();
+    homework.acceptedAt = acceptanceTime.toISOString();
+    // Set new dueDate to 24 hours from acceptance time
+    homework.dueDate = new Date(acceptanceTime.getTime() + 24 * 60 * 60 * 1000).toISOString();
     homework.currentType = 'perform'; // Change type to 'perform' after accepting
     updateTimers(); // Update timers immediately
   } else if (homework.currentType === 'perform') {
@@ -316,6 +304,53 @@ onMounted(() => {
 onUnmounted(() => {
   clearInterval(interval);
 });
+
+// Computed property to determine time bar width
+const getTimeBarWidth = (homework: Homework) => {
+  let totalAllottedDuration: number; // The total duration allocated for the task
+  let timeRemaining: number; // The time left until the task is due
+
+  if (homework.currentType === 'perform') {
+    // For accepted homework, the total allotted time is 24 hours from acceptance.
+    // The dueDate is already set to acceptedAt + 24 hours when accepted.
+    totalAllottedDuration = 24 * 60 * 60 * 1000;
+    timeRemaining = calculateTimeRemaining(homework.dueDate);
+  } else {
+    // For unaccepted homework, the total allotted time is from createdAt to original dueDate.
+    const createdAtMs = new Date(homework.createdAt).getTime();
+    const originalDueDateMs = new Date(homework.dueDate).getTime();
+    totalAllottedDuration = originalDueDateMs - createdAtMs;
+    timeRemaining = calculateTimeRemaining(homework.dueDate);
+  }
+
+  // Ensure totalAllottedDuration is positive to avoid division by zero or negative results
+  if (totalAllottedDuration <= 0) {
+    return '0%'; // If no duration or already passed initial due date, show 0% remaining
+  }
+
+  // Calculate the percentage of time remaining, clamping at 0% and 100%
+  const progressPercentage = Math.max(0, Math.min(100, (timeRemaining / totalAllottedDuration) * 100));
+
+  return `${progressPercentage}%`;
+};
+
+// Computed property to determine time bar color
+const getTimeBarColorClass = (homework: Homework) => {
+  if (homework.currentType === 'perform') {
+    // If the homework is accepted ('perform' state), the bar should be red.
+    return 'red-bar';
+  } else {
+    // If the homework is not yet accepted ('accept' state)
+    const timeLeft = calculateTimeRemaining(homework.dueDate);
+    if (timeLeft < 0) {
+      // If overdue for acceptance, it should also be red.
+      return 'red-bar';
+    } else {
+      // Otherwise, it's blue.
+      return 'blue-bar';
+    }
+  }
+};
 </script>
 
 <template>
@@ -326,22 +361,25 @@ onUnmounted(() => {
           <img :src="homework.iconImage" :alt="homework.title" class="icon-image" />
         </div>
         <div class="homework-details">
-          <div class="homework-title">{{ homework.title }}</div>
-          <div class="homework-time">
-            <span v-if="homework.acceptedAt">Час прийняття:</span>
-            <span v-else>Час на прийняття:</span>
-            <span class="time-value">{{ timers[homework.id] }}</span>
-            <div
-                class="time-bar"
-                :class="{
-                  'red-bar': homework.currentType === 'perform' && !homework.acceptedAt && calculateTimeRemaining(homework.dueDate) < 0,
-                  'blue-bar': homework.currentType === 'accept' || homework.acceptedAt || calculateTimeRemaining(homework.dueDate) >= 0
-                }"
-                :style="{ width: homework.acceptedAt ? '100%' : (Math.max(0, 1 - calculateTimeRemaining(homework.dueDate) / (new Date(homework.dueDate).getTime() - new Date(homework.createdAt).getTime())) * 100) + '%' }"
-            ></div>
-          </div>
-          <div class="homework-rewards">
-            Винагороди <span class="reward-value">G +{{ homework.rewards }}</span>
+          <div class="homework-grid">
+            <div class="homework-title">{{ homework.title }}</div>
+            <div class="homework-time">
+              <div class="homework-time-title">{{ homework.acceptedAt ? 'Час на виконання:' : 'Час на прийняття:' }}</div>
+              <div class="homework-time-title-progress-bar-wrapper">
+                <div class="time-value">{{ timers[homework.id] }}</div>
+                <div
+                    class="time-bar"
+                    :class="getTimeBarColorClass(homework)"
+                    :style="{ width: getTimeBarWidth(homework) }"
+                ></div>
+              </div>
+            </div>
+            <div class="homework-rewards">
+              <div class="homework-rewards-title">Винагороди</div>
+              <span class="reward-value"><span class="gelios-coin"><svg width="30" height="33" viewBox="0 0 30 33" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M15.4299 32.0846C12.339 32.0846 9.70604 31.4389 7.53095 30.1475C5.35587 28.8273 3.69594 27.005 2.55116 24.6804C1.40638 22.3271 0.833984 19.5864 0.833984 16.4583C0.833984 14.1337 1.1488 12.0243 1.77843 10.1302C2.43668 8.20741 3.38112 6.55724 4.61176 5.17971C5.87102 3.80218 7.40217 2.75468 9.2052 2.03721C11.0082 1.29105 13.0545 0.917969 15.3441 0.917969C17.6623 0.917969 19.7372 1.29105 21.5688 2.03721C23.4005 2.78338 24.9173 3.90262 26.1193 5.39495C27.35 6.85858 28.1513 8.69528 28.5234 10.9051H22.2986C22.0697 9.95802 21.6547 9.18316 21.0537 8.58049C20.4527 7.94912 19.6943 7.4756 18.7784 7.15991C17.8912 6.84423 16.8752 6.68639 15.7304 6.68639C14.1564 6.68639 12.8256 6.95902 11.738 7.50429C10.6505 8.04957 9.76328 8.79573 9.07641 9.74278C8.41816 10.6611 7.93163 11.723 7.61681 12.9283C7.33062 14.105 7.18752 15.3247 7.18752 16.5874C7.18752 18.3093 7.47372 19.9164 8.04611 21.4088C8.6185 22.8724 9.52001 24.0634 10.7507 24.9817C11.9813 25.8714 13.6126 26.3162 15.6446 26.3162C16.9897 26.3162 18.1774 26.1153 19.2077 25.7135C20.2666 25.2831 21.1109 24.6517 21.7406 23.8194C22.3988 22.9585 22.7709 21.9253 22.8567 20.72H14.5714V15.4251H29.1673V17.104C29.1673 20.2034 28.6522 22.8724 27.6219 25.1109C26.5916 27.3494 25.0604 29.0713 23.0284 30.2766C20.9964 31.482 18.4636 32.0846 15.4299 32.0846Z" fill="#D2BB3F"/>
+</svg></span> +{{ homework.rewards }}</span>
+            </div>
           </div>
           <button
               :class="['homework-button', { 'blue': homework.currentType === 'accept', 'red': homework.currentType === 'perform' }]"
@@ -372,12 +410,12 @@ onUnmounted(() => {
   gap: 15px;
   max-height: 520px;
   overflow-y: auto;
-  padding-right: 10px;
+  padding-right: 10px; /* Keep this for scrollbar spacing if needed, but box-sizing on item should prevent overlap */
 }
 
 .homework-item {
   background-color: #fff;
-  border-radius: 10px;
+  border-radius: 28px;
   padding: 15px;
   display: flex;
   align-items: center;
@@ -385,6 +423,7 @@ onUnmounted(() => {
   position: relative;
   overflow: hidden;
   min-height: 92px;
+  box-sizing: border-box; /* Ensures padding is included in the element's total width/height */
 
   &:nth-child(odd) {
     background-image: linear-gradient(to right, #e0f7fa, #ffffff);
@@ -395,10 +434,10 @@ onUnmounted(() => {
 }
 
 .homework-icon {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background-color: #f0f0f0; // Neutral background for images
+  width: 90px;
+  height: 60px;
+  border-radius: 12px;
+  background-color: transparent; // As per screenshot
   display: flex;
   justify-content: center;
   align-items: center;
@@ -406,12 +445,12 @@ onUnmounted(() => {
   color: white;
   margin-right: 15px;
   flex-shrink: 0;
-  overflow: hidden; // Ensure image fits within the circle
+  overflow: hidden;
 
   .icon-image {
     width: 100%;
     height: 100%;
-    object-fit: cover; // Cover the circle area
+    object-fit: cover;
   }
 }
 
@@ -419,7 +458,7 @@ onUnmounted(() => {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  position: relative; // For positioning the button
+  position: relative;
 }
 
 .homework-title {
@@ -429,48 +468,90 @@ onUnmounted(() => {
   margin-bottom: 5px;
 }
 
+.homework-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr; /* Two columns for time and rewards */
+  gap: 30px; /* Space between time and rewards sections */
+  align-items: center; /* Align items to the top of their cells */
+  width: calc(100% - 60px); /* Adjust width to make space for the button */
+}
+
 .homework-time {
   display: flex;
-  align-items: center;
-  gap: 5px;
+  flex-direction: column; /* Stack "Час на ..." and value vertically */
+  align-items: flex-start;
   font-size: 0.9em;
   color: #555;
-  margin-bottom: 10px;
-  position: relative; // For the time bar
+  position: relative;
+  width: 100%; /* Take full width of its grid cell */
+  
+  &-title {
+    font-family: Onest;
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 16px;
+    leading-trim: NONE;
+    line-height: 24px;
+    letter-spacing: 0%;
+  }
+}
+
+.homework-time-title-progress-bar-wrapper {
+  display: flex;
+  flex-direction: row;
 }
 
 .time-value {
   font-weight: bold;
   color: #000;
+  margin-top: 2px; /* Small space between label and value */
+  display: flex;
 }
 
 .time-bar {
+  display: flex;
   position: absolute;
-  bottom: -5px; // Adjust as needed
+  bottom: -5px;
   left: 0;
-  width: 70%; // Default width for "Час на прийняття"
+  width: 100%; /* Ensure bar covers the full width of the time container */
   height: 5px;
   border-radius: 3px;
-  background-color: #ddd; // Default grey
+  background-color: #ddd;
 
   &.blue-bar {
-    background-color: #2196F3; // Blue
+    background-color: #2196F3;
   }
 
   &.red-bar {
-    background-color: #F44336; // Red
+    background-color: #F44336;
   }
 }
 
 .homework-rewards {
   font-size: 0.9em;
   color: #555;
-  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column; /* Stack "Винагороди" and value vertically */
+  align-items: flex-start;
+  gap: 4px;
+  
+  &-title {
+    font-family: Onest;
+    font-weight: 500;
+    font-style: Medium;
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: 0%;
+  }
 }
 
 .reward-value {
   font-weight: bold;
-  color: #4CAF50; // Green for rewards
+  color: #000;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .homework-button {
@@ -478,28 +559,44 @@ onUnmounted(() => {
   right: 15px;
   top: 50%;
   transform: translateY(-50%);
-  padding: 8px 15px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: bold;
-  color: white;
-  font-size: 0.9em;
-  min-width: 90px;
-  text-align: center;
+  padding: 10px 18px;
+  font-family: Onest;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -2%;
+  border-radius: 8px;
+  color: #ffffff;
+
 
   &.blue {
-    background-color: #2196F3; // Blue button for "Прийняти"
+    background-color: #0066FF;
     &:hover {
       background-color: #1976D2;
     }
   }
 
   &.red {
-    background-color: #F44336; // Red button for "Виконати"
+    background-color: #FF6666;
     &:hover {
       background-color: #D32F2F;
     }
+  }
+}
+
+.gelios-coin {
+  background: #FFDF39;
+  width: 24px;
+  height: 24px;
+  padding: 6px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+  svg {
+    width: 12px;
+    height: 12px;
   }
 }
 </style>
