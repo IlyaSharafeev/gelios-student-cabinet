@@ -37,7 +37,7 @@ const router = useRouter();
 
 // Utility function to slugify text (copied from GamesPage.vue)
 const slugify = (text: string): string => {
-  const ua: { [key: string]: string } = { 'а':'a','б':'b','в':'v','г':'h','ґ':'g','д':'d','е':'e','є':'ie','ж':'zh','з':'z','и':'y','і':'i','ї':'i','й':'i','к':'k','л':'l','м':'m','н':'n','о':'o','п':'p','р':'r','с':'s','т':'t','у':'u','ф':'f','х':'kh','ц':'ts','ч':'ch','ш':'sh','щ':'shch','ь':'','ю':'iu','я':'ia' };
+  const ua: { [key: string]: string } = { 'а':'a','б':'b','в':'v','г':'h','ґ':'g','д':'d','е':'e','є':'ie','ж':'zh','з':'z','и':'i','і':'i','ї':'i','й':'i','к':'k','л':'l','м':'m','н':'n','о':'o','п':'p','р':'r','с':'s','т':'t','у':'u','ф':'f','х':'kh','ц':'ts','ч':'ch','ш':'sh','щ':'shch','ь':'','ю':'iu','я':'ia' };
   return text.toLowerCase().trim()
       .replace(/[а-яґєїі]/g, (match) => ua[match])
       .replace(/ & /g, '-and-')
@@ -377,7 +377,10 @@ const getTimeBarColorClass = (homework: Homework) => {
               <div class="homework-time-title">{{ homework.acceptedAt ? 'Час на виконання:' : 'Час на прийняття:' }}</div>
               <div class="homework-time-title-progress-bar-wrapper">
                 <div class="time-value" :class="getTimeBarColorClass(homework)">{{ timers[homework.id] }}</div>
-                <div class="time-bar-container">
+                <div
+                    class="time-bar-container"
+                    :class="getTimeBarColorClass(homework)"
+                >
                   <div
                       class="time-bar-progress"
                       :class="getTimeBarColorClass(homework)"
@@ -535,9 +538,23 @@ const getTimeBarColorClass = (homework: Homework) => {
   flex-grow: 1;
   height: 12px;
   border-radius: 3px;
-  background-color: #ddd; /* Gray background for the full bar length */
   overflow: hidden;
   position: relative;
+
+  &.blue-text-and-bar {
+    background-color: #DEEBFF;
+    border-radius: 10px;
+  }
+
+  &.red-text-and-bar {
+    background-color: #FFEBEE; // A lighter red for the container
+    border-radius: 10px;
+  }
+
+  // Fallback or default if no specific class is applied
+  &:not(.blue-text-and-bar):not(.red-text-and-bar) {
+    background-color: #ddd; // Original gray for unclassified states
+  }
 }
 
 .time-bar-progress {
