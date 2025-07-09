@@ -597,7 +597,7 @@ const getTimeBarColorClass = (homework: Homework) => {
   color: #ffffff;
 
   &.blue {
-    background-color: #s;
+    background: #0066FF;
     &:hover {
       background-color: #1976D2;
     }
