@@ -37,9 +37,9 @@ const router = useRouter();
 
 // Utility function to slugify text (copied from GamesPage.vue)
 const slugify = (text: string): string => {
-  const ua = { 'а':'a','б':'b','в':'v','г':'h','ґ':'g','д':'d','е':'e','є':'ie','ж':'zh','з':'z','и':'y','і':'i','ї':'i','й':'i','к':'k','л':'l','м':'m','н':'n','о':'o','п':'p','р':'r','с':'s','т':'t','у':'u','ф':'f','х':'kh','ц':'ts','ч':'ch','ш':'sh','щ':'shch','ь':'','ю':'iu','я':'ia' };
+  const ua: { [key: string]: string } = { 'а':'a','б':'b','в':'v','г':'h','ґ':'g','д':'d','е':'e','є':'ie','ж':'zh','з':'z','и':'y','і':'i','ї':'i','й':'i','к':'k','л':'l','м':'m','н':'n','о':'o','п':'p','р':'r','с':'s','т':'t','у':'u','ф':'f','х':'kh','ц':'ts','ч':'ch','ш':'sh','щ':'shch','ь':'','ю':'iu','я':'ia' };
   return text.toLowerCase().trim()
-      .replace(/[а-яґєїі]/g, (match) => ua[match as keyof typeof ua])
+      .replace(/[а-яґєїі]/g, (match) => ua[match])
       .replace(/ & /g, '-and-')
       .replace(/ /g, '-')
       .replace(/[^\w-]+/g, '');
@@ -260,7 +260,8 @@ const formatTimeRemaining = (ms: number): string => {
     result = `${seconds} секунди(н)`;
   }
 
-  return ms < 0 ? `${result}` : `${result}`;
+  // Add "Прострочено" prefix if time is negative
+  return ms < 0 ? `Прострочено на ${result}` : result;
 };
 
 const calculateTimeRemaining = (isoDueDateString: string) => {
@@ -307,48 +308,57 @@ onUnmounted(() => {
 
 // Computed property to determine time bar width
 const getTimeBarWidth = (homework: Homework) => {
-  let totalAllottedDuration: number; // The total duration allocated for the task
-  let timeRemaining: number; // The time left until the task is due
+  const nowMs = new Date().getTime();
+  const dueDateMs = new Date(homework.dueDate).getTime();
 
+  // If homework is in 'perform' state, the bar should be 100% full (red)
+  // This visually indicates it's an active, ongoing task.
   if (homework.currentType === 'perform') {
-    // For accepted homework, the total allotted time is 24 hours from acceptance.
-    // The dueDate is already set to acceptedAt + 24 hours when accepted.
-    totalAllottedDuration = 24 * 60 * 60 * 1000;
-    timeRemaining = calculateTimeRemaining(homework.dueDate);
+    return '100%';
+  }
+
+  const timeLeft = dueDateMs - nowMs;
+
+  if (timeLeft < 0) {
+    return '100%'; // If overdue (for acceptance), also show 100% progress
+  }
+
+  let totalDuration: number;
+  let elapsedTime: number;
+
+  if (homework.currentType === 'perform' && homework.acceptedAt) {
+    const acceptedAtMs = new Date(homework.acceptedAt).getTime();
+    totalDuration = 24 * 60 * 60 * 1000; // 24 hours from acceptance
+    elapsedTime = nowMs - acceptedAtMs;
   } else {
-    // For unaccepted homework, the total allotted time is from createdAt to original dueDate.
     const createdAtMs = new Date(homework.createdAt).getTime();
-    const originalDueDateMs = new Date(homework.dueDate).getTime();
-    totalAllottedDuration = originalDueDateMs - createdAtMs;
-    timeRemaining = calculateTimeRemaining(homework.dueDate);
+    totalDuration = dueDateMs - createdAtMs;
+    elapsedTime = nowMs - createdAtMs;
   }
 
-  // Ensure totalAllottedDuration is positive to avoid division by zero or negative results
-  if (totalAllottedDuration <= 0) {
-    return '0%'; // If no duration or already passed initial due date, show 0% remaining
+  // Ensure totalDuration is positive to avoid division by zero or negative results
+  if (totalDuration <= 0) {
+    return '100%'; // Fallback if duration is invalid or already passed
   }
 
-  // Calculate the percentage of time remaining, clamping at 0% and 100%
-  const progressPercentage = Math.max(0, Math.min(100, (timeRemaining / totalAllottedDuration) * 100));
+  // Calculate the percentage of time elapsed, clamping at 0% and 100%
+  const progressPercentage = Math.max(0, Math.min(100, (elapsedTime / totalDuration) * 100));
 
   return `${progressPercentage}%`;
 };
 
 // Computed property to determine time bar color
 const getTimeBarColorClass = (homework: Homework) => {
+  const timeLeft = calculateTimeRemaining(homework.dueDate);
+
   if (homework.currentType === 'perform') {
-    // If the homework is accepted ('perform' state), the bar should be red.
-    return 'red-bar';
+    // If homework is accepted (currentType is 'perform'), the bar should be red
+    // This is because acceptance means the "timer" for performing has started,
+    // and visually, you want to convey a sense of urgency/active task.
+    return 'red-text-and-bar';
   } else {
-    // If the homework is not yet accepted ('accept' state)
-    const timeLeft = calculateTimeRemaining(homework.dueDate);
-    if (timeLeft < 0) {
-      // If overdue for acceptance, it should also be red.
-      return 'red-bar';
-    } else {
-      // Otherwise, it's blue.
-      return 'blue-bar';
-    }
+    // For unaccepted homework, if overdue for acceptance, it's red. Otherwise, blue.
+    return timeLeft < 0 ? 'red-text-and-bar' : 'blue-text-and-bar';
   }
 };
 </script>
@@ -366,12 +376,14 @@ const getTimeBarColorClass = (homework: Homework) => {
             <div class="homework-time">
               <div class="homework-time-title">{{ homework.acceptedAt ? 'Час на виконання:' : 'Час на прийняття:' }}</div>
               <div class="homework-time-title-progress-bar-wrapper">
-                <div class="time-value">{{ timers[homework.id] }}</div>
-                <div
-                    class="time-bar"
-                    :class="getTimeBarColorClass(homework)"
-                    :style="{ width: getTimeBarWidth(homework) }"
-                ></div>
+                <div class="time-value" :class="getTimeBarColorClass(homework)">{{ timers[homework.id] }}</div>
+                <div class="time-bar-container">
+                  <div
+                      class="time-bar-progress"
+                      :class="getTimeBarColorClass(homework)"
+                      :style="{ width: getTimeBarWidth(homework) }"
+                  ></div>
+                </div>
               </div>
             </div>
             <div class="homework-rewards">
@@ -506,26 +518,39 @@ const getTimeBarColorClass = (homework: Homework) => {
 
 .time-value {
   font-weight: bold;
-  color: #000;
   margin-top: 2px;
   display: flex;
   flex-shrink: 0; /* Prevent the time value from shrinking */
-}
 
-.time-bar {
-  flex-grow: 1; /* Allow the bar to take up available space */
-  height: 5px;
-  border-radius: 3px;
-  background-color: #ddd; /* This will be the background of the *full* bar length */
-  overflow: hidden; /* Important for clipping the inner colored bar if it exceeds 100% */
-  position: relative; /* Needed if you were to have an inner div for the progress */
-
-  &.blue-bar {
-    background-color: #2196F3;
+  &.blue-text-and-bar {
+    color: #2196F3;
   }
 
-  &.red-bar {
-    background-color: #F44336;
+  &.red-text-and-bar {
+    color: #F44336;
+  }
+}
+
+.time-bar-container {
+  flex-grow: 1;
+  height: 12px;
+  border-radius: 3px;
+  background-color: #ddd; /* Gray background for the full bar length */
+  overflow: hidden;
+  position: relative;
+}
+
+.time-bar-progress {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.5s ease-in-out; /* Smooth transition for width changes */
+
+  &.blue-text-and-bar {
+    background-color: #0066FF;
+  }
+
+  &.red-text-and-bar {
+    background-color: #FF6666;
   }
 }
 
@@ -553,6 +578,7 @@ const getTimeBarColorClass = (homework: Homework) => {
   margin-top: 2px;
   display: flex;
   align-items: center;
+  font-size: 20px;
   gap: 6px;
 }
 
@@ -571,7 +597,7 @@ const getTimeBarColorClass = (homework: Homework) => {
   color: #ffffff;
 
   &.blue {
-    background-color: #0066FF;
+    background-color: #s;
     &:hover {
       background-color: #1976D2;
     }
