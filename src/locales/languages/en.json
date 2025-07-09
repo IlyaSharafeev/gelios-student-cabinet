@@ -191,7 +191,7 @@
   "dashboard.teacher_label": "teacher",
   "dashboard.quote": "Everyone has an inner sun. Let it shine!",
   "dashboard.balance": "balance",
-  "tabs.classes": "Занятия",
-  "tabs.homeworks": "Занятия",
-  "tabs.materials": "Занятия"
+  "tabs.classes": "Classes",
+  "tabs.homeworks": "Homework",
+  "tabs.materials": "Materials"
 }
