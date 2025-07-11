@@ -24,6 +24,11 @@ const router = createRouter({
           component: () => import('@/pages/SchedulePage.vue'),
         },
         {
+          path: 'account',
+          name: 'account',
+          component: () => import('@/pages/AccountPage.vue'),
+        },
+        {
           path: 'homework/:tab?', // Modified line
           name: 'homework',
           component: () => import('@/pages/HomeworkPage.vue'),

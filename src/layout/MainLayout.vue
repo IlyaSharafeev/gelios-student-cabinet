@@ -30,7 +30,7 @@ const showBackgroundElements = computed(() => {
 <!--                <li>-->
 <!--                  <router-link to="/schedule" class="sidebar-link">-->
 <!--                    <img-->
-<!--                        src="@/assets/images/sidebar/calendar.svg"-->
+<!--                        src="@/assets/images/sidebar/float-icon.svg"-->
 <!--                        alt="schedule"-->
 <!--                        class="sidebar-icon"-->
 <!--                    />-->
@@ -45,15 +45,15 @@ const showBackgroundElements = computed(() => {
                     />
                   </router-link>
                 </li>
-<!--                <li>-->
-<!--                  <router-link to="/add-homework" class="sidebar-link">-->
-<!--                    <img-->
-<!--                        src="@/assets/images/sidebar/add-homework.svg"-->
-<!--                        alt="homework"-->
-<!--                        class="sidebar-icon"-->
-<!--                    />-->
-<!--                  </router-link>-->
-<!--                </li>-->
+                <li>
+                  <router-link to="/account" class="sidebar-link">
+                    <img
+                        src="@/assets/images/sidebar/students.svg"
+                        alt="homework"
+                        class="sidebar-icon"
+                    />
+                  </router-link>
+                </li>
                 <li>
                   <router-link to="/games" class="sidebar-link">
                     <img
@@ -107,7 +107,7 @@ const showBackgroundElements = computed(() => {
 <!--              <li>-->
 <!--                <router-link to="/schedule" class="sidebar-link">-->
 <!--                  <img-->
-<!--                      src="@/assets/images/sidebar/calendar.svg"-->
+<!--                      src="@/assets/images/sidebar/float-icon.svg"-->
 <!--                      alt="schedule"-->
 <!--                      class="sidebar-icon"-->
 <!--                  />-->
@@ -117,6 +117,15 @@ const showBackgroundElements = computed(() => {
                 <router-link to="/homework" class="sidebar-link">
                   <img
                       src="@/assets/images/sidebar/homework.svg"
+                      alt="homework"
+                      class="sidebar-icon"
+                  />
+                </router-link>
+              </li>
+              <li>
+                <router-link to="/account" class="sidebar-link">
+                  <img
+                      src="@/assets/images/sidebar/students.svg"
                       alt="homework"
                       class="sidebar-icon"
                   />
