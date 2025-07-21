@@ -35,7 +35,12 @@ const registerForm = ref({
 
 const registerRules = computed(() => ({
   email: { required, email },
-  username: { required, minLength: minLength(3) },
+  username: {
+    required,
+    minLength: minLength(3),
+    // Updated regex: Allows letters (Latin and Cyrillic), spaces, hyphens, and apostrophes, but explicitly disallows digits.
+    alpha: helpers.regex(/^[a-zA-Zа-яА-ЯіІїЇєЄґҐ\s\-'’]*$/),
+  },
   contactNumber: { required, phoneNumber },
   password: { required, minLength: minLength(6) },
   // confirmPassword: { required, sameAs: sameAs(registerForm.value.password) },
@@ -123,9 +128,14 @@ watch(selectedValueLanguage, (newValue) => {
                     :placeholder="t('register.form.username.placeholder')"
                     v-model="registerForm.username"
                     @blur="vRegister.username.$touch"
+                    pattern="^[a-zA-Zа-яА-ЯіІїЇєЄґҐ\s\-'’]*$"
+                    title="Имя пользователя должно содержать только буквы, пробелы, дефисы и апострофы."
                 />
                 <div class="error-message" v-if="vRegister.username.$error">
-                  {{ vRegister.username.$errors[0].$message || t("register.validation.username") }}
+                  <template v-if="vRegister.username.required.$invalid">{{ t("register.validation.username_required") }}</template>
+                  <template v-else-if="vRegister.username.minLength.$invalid">{{ t("register.validation.username_min_length") }}</template>
+                  <template v-else-if="vRegister.username.alpha.$invalid">{{ t("register.validation.username_alpha_only") }}</template>
+                  <template v-else>{{ t("register.validation.username") }}</template>
                 </div>
               </div>
             </div>
@@ -162,22 +172,6 @@ watch(selectedValueLanguage, (newValue) => {
               </div>
             </div>
           </div>
-          <!-- <div class="form-confirm-password">
-            <div class="label">{{ t("register.form.confirm_password.label") }}</div>
-            <div class="field-confirm-password">
-              <input
-                  class="input"
-                  :class="{ 'input-error': vRegister.confirmPassword.$error }"
-                  type="password"
-                  :placeholder="t('register.form.confirm_password.placeholder')"
-                  v-model="registerForm.confirmPassword"
-                  @blur="vRegister.confirmPassword.$touch"
-              />
-              <div class="error-message" v-if="vRegister.confirmPassword.$error">
-                {{ vRegister.confirmPassword.$errors[0].$message || t("register.validation.confirm_password") }}
-              </div>
-            </div>
-          </div> -->
         </div>
         <div class="button register-button" @click="onRegisterSubmit">{{ t("register.form.submit") }}</div>
         <div class="do-you-have-account">

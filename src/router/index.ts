@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import GamesPage from '@/pages/GamesPage.vue';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -23,9 +24,26 @@ const router = createRouter({
           component: () => import('@/pages/SchedulePage.vue'),
         },
         {
-          path: 'homework',
+          path: 'account',
+          name: 'account',
+          component: () => import('@/pages/AccountPage.vue'),
+        },
+        {
+          path: 'homework/:tab?', // Modified line
           name: 'homework',
           component: () => import('@/pages/HomeworkPage.vue'),
+        },
+        {
+          path: 'games',
+          name: 'games-grid',
+          component: GamesPage,
+          children: [
+            {
+              path: ':trainerSlug',
+              name: 'game-view',
+              component: GamesPage,
+            }
+          ]
         },
         {
           path: 'add-homework',
@@ -56,18 +74,11 @@ const router = createRouter({
         }
       },
     },
-    // {
-    //   path: '/register',
-    //   name: 'register',
-    //   component: () => import('@/pages/RegisterPage.vue'),
-    //   beforeEnter: (to, from, next) => {
-    //     if (localStorage.token) {
-    //       next('/');
-    //     } else {
-    //       next();
-    //     }
-    //   },
-    // },
+    {
+      path: '/register',
+      name: 'register',
+      component: () => import('@/pages/RegisterPage.vue'),
+    },
     {
       path: '/reset-password',
       name: 'reset-password',
@@ -96,17 +107,7 @@ router.beforeEach((to, from, next) => {
     if (!token) {
       next({ name: 'login' });
     } else {
-      try {
-        if (token === 'invalid' || !token) {
-          localStorage.removeItem('token');
-          next({ name: 'login' });
-        } else {
-          next();
-        }
-      } catch (error) {
-        localStorage.removeItem('token');
-        next({ name: 'login' });
-      }
+      next();
     }
   } else {
     next();
