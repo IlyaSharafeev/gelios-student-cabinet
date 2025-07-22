@@ -1,18 +1,17 @@
 <template>
   <div v-if="isVisible" class="modal-overlay" @click.self="closeModal">
+    <button class="close-button" @click="closeModal">&times;</button>
     <div class="modal-content">
-      <button class="close-button" @click="closeModal">&times;</button>
       <div class="image-viewer-container">
         <img :src="imageUrl" alt="Certificate Preview" class="certificate-preview-image" v-if="imageUrl">
         <p v-else>Изображение не найдено.</p>
       </div>
-      <button class="download-button" @click="downloadPdf">Скачать PDF</button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, defineExpose } from 'vue'; // Import defineExpose
 import { jsPDF } from 'jspdf'; // Импорт jspdf для генерации PDF в модалке
 
 // --- Импорт шрифтов (они нужны здесь, так как PDF генерируется в модалке) ---
@@ -29,6 +28,13 @@ const props = defineProps<{
 const emit = defineEmits(['close']);
 
 const isVisible = ref(props.showModal);
+
+// Internal state for download trigger
+const downloadTriggerData = ref<{
+  imageUrl: string;
+  certificateData: any;
+  studentName: string;
+} | null>(null);
 
 watch(() => props.showModal, (newVal) => {
   isVisible.value = newVal;
@@ -59,19 +65,16 @@ const formatDate = (date: Date): string => {
 };
 
 // --- Функция генерации и скачивания PDF (ТЕПЕРЬ ДОБАВЛЯЕТ ТЕКСТ) ---
-const downloadPdf = async () => {
-  if (!props.certificateData || !props.imageUrl || !props.studentName) {
-    console.error("Недостаточно данных для генерации PDF из модалки.");
+const downloadPdf = async (imageUrlToUse: string, certificateToUse: any, studentNameToUse: string) => {
+  if (!certificateToUse || !imageUrlToUse || !studentNameToUse) {
+    console.error("Недостаточно данных для генерации PDF.");
     return;
   }
-
-  const certificate = props.certificateData;
-  const studentName = props.studentName;
 
   try {
     const img = new Image();
     img.crossOrigin = 'anonymous';
-    img.src = props.imageUrl; // Используем то же изображение, что и в превью модалки
+    img.src = imageUrlToUse; // Используем переданный URL
 
     await new Promise((resolve, reject) => {
       img.onload = resolve;
@@ -99,14 +102,14 @@ const downloadPdf = async () => {
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       // Эти координаты - из ваших предыдущих реализаций
-      ctx.fillText(studentName, canvas.width / 2 + 500, canvas.height / 2 - 15);
+      ctx.fillText(studentNameToUse, canvas.width / 2 + 500, canvas.height / 2 - 15);
 
       // --- НАНОСИМ ТЕКСТ (ДАТА) ---
       ctx.font = 'bold 55px Nunito, sans-serif';
       ctx.fillStyle = '#FFFFFF';
       ctx.textAlign = 'right';
       ctx.textBaseline = 'bottom';
-      const certificateDate = new Date(certificate.created_at);
+      const certificateDate = new Date(certificateToUse.created_at);
       const dateText = formatDate(certificateDate);
       const dateLines = dateText.split('\n');
       // Эти координаты - из ваших предыдущих реализаций
@@ -126,13 +129,39 @@ const downloadPdf = async () => {
       pdf.setFont('MarckScript');
       pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, img.width, img.height);
 
-      const fileName = `Certificate_${studentName}_${certificate.direction_name}_${certificate.level_name}.pdf`;
+      const fileName = `Certificate_${studentNameToUse}_${certificateToUse.direction_name}_${certificateToUse.level_name}.pdf`;
       pdf.save(fileName); // Скачиваем PDF
     });
   } catch (error) {
     console.error('Ошибка при генерации или скачивании PDF:', error);
   }
 };
+
+// --- Методы, которые будут доступны для родительского компонента ---
+const setDownloadData = (imageUrl: string, certificateData: any, studentName: string) => {
+  downloadTriggerData.value = { imageUrl, certificateData, studentName };
+};
+
+const triggerDownload = () => {
+  if (downloadTriggerData.value) {
+    downloadPdf(
+        downloadTriggerData.value.imageUrl,
+        downloadTriggerData.value.certificateData,
+        downloadTriggerData.value.studentName
+    );
+  }
+};
+
+const clearDownloadData = () => {
+  downloadTriggerData.value = null;
+};
+
+// Expose methods to parent component
+defineExpose({
+  setDownloadData,
+  triggerDownload,
+  clearDownloadData,
+});
 </script>
 
 <style scoped lang="scss">
@@ -152,9 +181,8 @@ const downloadPdf = async () => {
 .modal-content {
   background-color: rgba(255, 255, 255, 0);
   border-radius: 10px;
-  padding: 20px;
   width: 90%;
-  max-width: 900px;
+  max-width: 700px;
   height: 90%;
   max-height: 90vh;
   display: flex;
@@ -165,8 +193,8 @@ const downloadPdf = async () => {
 
 .close-button {
   position: absolute;
-  top: 10px;
-  right: 15px;
+  top: 50px;
+  right: 150px;
   background: none;
   border: none;
   font-size: 2.5em;
@@ -193,20 +221,5 @@ const downloadPdf = async () => {
     border-radius: 5px;
   }
 }
-
-.download-button {
-  padding: 10px 20px;
-  background-color: #0066FF;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 16px;
-  align-self: center;
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background-color: #0056b3;
-  }
-}
+// .download-button is removed as it's no longer needed inside the modal.
 </style>

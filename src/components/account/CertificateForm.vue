@@ -2,10 +2,6 @@
 import { onMounted, watch, ref } from 'vue';
 import { useCertificatesStore } from '@/stores/certificates';
 import { storeToRefs } from 'pinia';
-// jsPDF, NunitoFont, MarckScriptFont больше не нужны здесь напрямую
-// import { jsPDF } from 'jspdf';
-// import NunitoFont from '@/assets/fonts/Nunito-VariableFont_wght.ttf';
-// import MarckScriptFont from '@/assets/fonts/MarckScript-Regular.ttf';
 
 // --- Импорт нового компонента модального окна ---
 import ImageViewerModal from '@/components/modal/PdfViewerModal.vue'; // Обновленный путь и имя
@@ -213,6 +209,30 @@ const showCertificateImageInModal = async (certificate: any, studentName: string
   openImageViewerModal(imagePath, certificate, studentName);
 };
 
+// --- НОВАЯ ФУНКЦИЯ для обработки скачивания PDF напрямую ---
+// Мы не открываем модалку для скачивания, а вызываем метод напрямую на PdfViewerModal
+// Для этого нам нужно получить доступ к инстансу PdfViewerModal.
+// Проще всего передать данные для скачивания через пропсы и добавить специальный пропс
+// или отдельный метод в PdfViewerModal, который будет триггерить скачивание без открытия.
+// Для простоты, мы будем использовать ref на PdfViewerModal.
+const pdfViewerModalRef = ref<any>(null);
+
+const handleDownloadPdf = (certificate: any, studentName: string) => {
+  const imagePath = getCertificateImagePath(certificate.image);
+  if (!imagePath) {
+    console.error(`Изображение для сертификата "${certificate.image}" не найдено для скачивания.`);
+    return;
+  }
+  // Вызываем метод downloadPdf напрямую на экземпляре модалки
+  // Это работает, потому что PdfViewerModal уже импортирует jspdf и шрифты
+  if (pdfViewerModalRef.value) {
+    // Временно устанавливаем данные, чтобы PdfViewerModal мог их использовать для генерации
+    pdfViewerModalRef.value.setDownloadData(imagePath, certificate, studentName);
+    pdfViewerModalRef.value.triggerDownload(); // Вызываем метод для скачивания
+    pdfViewerModalRef.value.clearDownloadData(); // Очищаем данные после скачивания
+  }
+};
+
 </script>
 
 <template>
@@ -247,8 +267,7 @@ const showCertificateImageInModal = async (certificate: any, studentName: string
             v-for="(certificate, certIndex) in studentData.certificates"
             :key="certificate.id !== undefined && certificate.id !== null && !isNaN(certificate.id) ? certificate.id : `${studentData.first_name}-${studentData.last_name}-cert-${certIndex}`"
             class="certificate-card"
-            :class="getCertificateCardClass(certificate)"
-            @click="showCertificateImageInModal(certificate, `${studentData.first_name} ${studentData.last_name}`)" >
+            :class="getCertificateCardClass(certificate)">
           <div class="certificate-image">
             <img :src="getCertificateImagePath(certificate.image)" alt="Certificate Icon" v-if="getCertificateImagePath(certificate.image)">
             <p v-else>Изображение не найдено</p>
@@ -257,11 +276,19 @@ const showCertificateImageInModal = async (certificate: any, studentName: string
           <div class="certificate-title">
             {{ certificate.level_name }}
           </div>
+
+          <div class="certificate-overlay">
+            <div class="overlay-icons">
+              <i class="fas fa-eye overlay-icon" @click.stop="showCertificateImageInModal(certificate, `${studentData.first_name} ${studentData.last_name}`)"></i>
+              <i class="fas fa-download overlay-icon" @click.stop="handleDownloadPdf(certificate, `${studentData.first_name} ${studentData.last_name}`)"></i>
+            </div>
+          </div>
         </div>
       </template>
     </div>
 
     <ImageViewerModal
+        ref="pdfViewerModalRef"
         :image-url="currentImageUrl"
         :show-modal="showImageViewerModal"
         :certificate-data="currentCertificateData"
@@ -368,6 +395,9 @@ const showCertificateImageInModal = async (certificate: any, studentName: string
     &:hover {
       transform: translateY(-5px);
       box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.12);
+      .certificate-overlay {
+        opacity: 1; // Show overlay on hover
+      }
     }
 
     // --- Стили для фоновых цветов в зависимости от level_name ---
@@ -427,6 +457,10 @@ const showCertificateImageInModal = async (certificate: any, studentName: string
         font-size: 3em;
         z-index: 10;
       }
+      // Оверлей не должен появляться на заблокированных
+      .certificate-overlay {
+        display: none; // Or opacity: 0 !important;
+      }
     }
   }
 
@@ -465,6 +499,40 @@ const showCertificateImageInModal = async (certificate: any, studentName: string
     display: none;
   }
 }
+
+// Стили для оверлея
+.certificate-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6); // Semi-transparent black
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0; // Hidden by default
+  transition: opacity 0.3s ease;
+  border-radius: 16px; // Match card border-radius
+
+  .overlay-icons {
+    display: flex;
+    gap: 20px; // Space between icons
+
+    .overlay-icon {
+      color: white;
+      font-size: 1.5em; // Larger icons
+      cursor: pointer;
+      transition: transform 0.2s ease, color 0.2s ease;
+
+      &:hover {
+        transform: scale(1.1);
+        color: #0066FF; // Highlight on hover
+      }
+    }
+  }
+}
+
 
 .loading-message,
 .error-message,
