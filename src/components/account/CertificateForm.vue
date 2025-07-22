@@ -237,24 +237,21 @@ const handleDownloadPdf = (certificate: any, studentName: string) => {
 
 <template>
   <div class="certificate-form">
-    <div class="certificate-header">
-      <div class="dropdown">
-        <label for="filter-certificates">Вибрати предмет</label>
-        <select id="filter-certificates">
-          <option value="all">Всі</option>
-          <option value="completed">Завершено</option>
-          <option value="in-progress">В процесі</option>
-        </select>
-        <span class="dropdown-arrow">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M6 9L12 15L18 9" stroke="#5F6D7E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </span>
-      </div>
-      <button class="filter-button active">Всі</button>
-      <button class="filter-button">Відкриті</button>
-      <button class="filter-button">Закриті</button>
-    </div>
+<!--    <div class="certificate-header">-->
+<!--      <div class="dropdown">-->
+<!--        <label for="filter-certificates">Вибрати предмет</label>-->
+<!--        <select id="filter-certificates">-->
+<!--          <option value="all">Всі</option>-->
+<!--          <option value="completed">Завершено</option>-->
+<!--          <option value="in-progress">В процесі</option>-->
+<!--        </select>-->
+<!--        <span class="dropdown-arrow">-->
+<!--          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">-->
+<!--            <path d="M6 9L12 15L18 9" stroke="#5F6D7E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>-->
+<!--          </svg>-->
+<!--        </span>-->
+<!--      </div>-->
+<!--    </div>-->
 
     <div v-if="loading" class="loading-message">Загрузка сертификатов...</div>
     <div v-else-if="error" class="error-message">{{ error }}</div>
