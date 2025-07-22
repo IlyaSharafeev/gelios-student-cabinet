@@ -1,15 +1,16 @@
 <script setup lang="ts">
-import { onMounted, watch } from 'vue';
+import { onMounted, watch, ref } from 'vue';
 import { useCertificatesStore } from '@/stores/certificates';
 import { storeToRefs } from 'pinia';
-import { jsPDF } from 'jspdf'; // Импорт jspdf
+// jsPDF, NunitoFont, MarckScriptFont больше не нужны здесь напрямую
+// import { jsPDF } from 'jspdf';
+// import NunitoFont from '@/assets/fonts/Nunito-VariableFont_wght.ttf';
+// import MarckScriptFont from '@/assets/fonts/MarckScript-Regular.ttf';
 
-// --- Импорт шрифтов (скопировано из AddSertificateForm.vue) ---
-import NunitoFont from '@/assets/fonts/Nunito-VariableFont_wght.ttf';
-import MarckScriptFont from '@/assets/fonts/MarckScript-Regular.ttf';
+// --- Импорт нового компонента модального окна ---
+import ImageViewerModal from '@/components/modal/PdfViewerModal.vue'; // Обновленный путь и имя
 
 // --- Импорт всех изображений для сертификатов ---
-// Эти пути остаются, как они есть у вас на диске
 import itGeliosStartEn from "@/assets/backgrounds/certificate-level-en/IT Gelios Start.png";
 import SchooolPreparationEn from "@/assets/backgrounds/certificate-level-en/Підготовка до школи.png";
 import SpeechTherapyEn from "@/assets/backgrounds/certificate-level-en/Логопедія.png";
@@ -56,7 +57,6 @@ import SpeedReadingSpeechTherapyUk6 from "@/assets/backgrounds/certificate-level
 import SpeedReadingSpeechTherapyUk from "@/assets/backgrounds/certificate-level-uk/Швидкочитання+Логопедія.png";
 
 // --- Карта изображений для сопоставления ---
-// СДЕЛАНО ТОЧНО ТАК ЖЕ, КАК В AddSertificateForm.vue
 const imageMap: Record<string, string> = {
   itGeliosStartEn, SchooolPreparationEn, SpeechTherapyEn, MentalArithmeticEn, MentalArithmeticEn1, MentalArithmeticEn2, MentalArithmeticEn3, MentalArithmeticEn4,
   MultiplicationandDivisionEn, SpeedReadingEn, SpeedReadingEn1, SpeedReadingEn2, SpeedReadingEn3, SpeedReadingEn4, SpeedReadingEn5, SpeedReadingEn6,
@@ -86,7 +86,7 @@ const getCertificateImagePath = (imageNameFromBackend: string): string | undefin
 
 
 const certificatesStore = useCertificatesStore();
-const { getStudentCertificates: studentCertificates, loading, error } = storeToRefs(certificatesStore); //
+const { getStudentCertificates: studentCertificates, loading, error } = storeToRefs(certificatesStore);
 
 onMounted(() => {
   console.log('CertificateForm: Компонент смонтирован, запускаю fetchStudentCertificates.');
@@ -133,31 +133,24 @@ watch([studentCertificates, loading, error], ([newCertificates, newLoading, newE
 // Функция для определения классов карточек
 const getCertificateCardClass = (certificate: any) => {
   const classes: string[] = [];
-  // Добавление класса для фона в зависимости от уровня
-  // Вам нужно будет адаптировать эту логику под ваши конкретные уровни/направления
-  // и цвета, если они не являются фиксированными строками, как здесь.
   switch (certificate.level_name) {
-    case 'Джуніор': // Пример из скриншота
+    case 'Джуніор':
       classes.push('level-junior');
       break;
-    case 'Базовий': // Пример из скриншота
+    case 'Базовий':
       classes.push('level-basic');
       break;
-    case 'Основний': // Пример из скриншота
+    case 'Основний':
       classes.push('level-main');
       break;
-    case 'Просунутий': // Пример из скриншота
+    case 'Просунутий':
       classes.push('level-advanced');
       break;
-    case 'Повний курс': // Пример из скриншота
-      // Может быть оранжевый или фиолетовый, как на скриншоте. Определитесь с логикой.
-      // Если "Повний курс" может быть разных цветов, нужно дополнительное поле в данных
-      // Здесь предполагаем, что сертификат с ID 5 (IT Gelios Start) имеет фиолетовый фон
-      // А другой "Повний курс" (если такой будет) будет оранжевым, или нужен признак с бэкенда
+    case 'Повний курс':
       if (certificate.id === 5) { // ID для "IT Gelios Start"
-        classes.push('level-full-course'); // Фиолетовый
+        classes.push('level-full-course');
       } else {
-        classes.push('level-full-course-orange'); // Оранжевый (если по умолчанию)
+        classes.push('level-full-course-orange');
       }
       break;
     case 'Прямий рахунок':
@@ -179,99 +172,45 @@ const getCertificateCardClass = (certificate: any) => {
       classes.push('level-profi');
       break;
     default:
-      // classes.push('level-default');
       break;
   }
 
-  // Если есть поле is_locked в данных сертификата (пример)
-  // В AddSertificateForm.vue нет такого поля в Certificates, вам нужно, чтобы бэкенд его предоставлял
   if (certificate.is_locked) {
     classes.push('locked');
   }
   return classes;
 };
 
-// --- Функция для форматирования даты (скопировано из AddSertificateForm.vue) ---
-const formatDate = (date: Date): string => {
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const year = date.getFullYear();
-  return `${day}.${month}\n${year}`;
+// --- СОСТОЯНИЕ ДЛЯ МОДАЛЬНОГО ОКНА ---
+const showImageViewerModal = ref(false);
+const currentImageUrl = ref<string | null>(null);
+const currentCertificateData = ref<any>(null); // Передаем весь объект сертификата
+const currentStudentName = ref(''); // Имя студента
+
+const openImageViewerModal = (imageUrl: string, certificate: any, studentName: string) => {
+  currentImageUrl.value = imageUrl;
+  currentCertificateData.value = certificate;
+  currentStudentName.value = studentName;
+  showImageViewerModal.value = true;
 };
 
-// --- Функция генерации PDF (скопировано из AddSertificateForm.vue) ---
-// Принимает объект сертификата, чтобы получить его изображение и данные
-const generateCertificatePdf = async (certificate: any, studentName: string): Promise<void> => {
-  if (!certificate || !certificate.image) {
-    const errorMsg = `Недостаточно данных для генерации PDF сертификата: ${certificate?.id || 'N/A'}`;
-    console.error(errorMsg);
-    throw new Error(errorMsg);
-  }
+const closeImageViewerModal = () => {
+  showImageViewerModal.value = false;
+  currentImageUrl.value = null;
+  currentCertificateData.value = null;
+  currentStudentName.value = '';
+};
 
-  const imagePath = getCertificateImagePath(certificate.image); // Получаем путь к изображению
+// --- Функция для показа изображения в модалке (БЕЗ ГЕНЕРАЦИИ PDF ЗДЕСЬ) ---
+const showCertificateImageInModal = async (certificate: any, studentName: string): Promise<void> => {
+  const imagePath = getCertificateImagePath(certificate.image);
   if (!imagePath) {
-    const errorMsg = `Изображение для сертификата "${certificate.image}" не найдено в imageMap.`;
-    console.error(errorMsg);
-    throw new Error(errorMsg);
+    console.error(`Изображение для сертификата "${certificate.image}" не найдено.`);
+    return;
   }
 
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = 'anonymous'; // Важно для загрузки изображений с других доменов (если применимо)
-    img.src = imagePath; // Используем найденный путь к изображению
-
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return reject(new Error('Failed to get canvas context'));
-
-      ctx.drawImage(img, 0, 0);
-
-      const marckScriptFont = new FontFace('MarckScript', `url(${MarckScriptFont})`);
-      const nunitoFont = new FontFace('Nunito', `url(${NunitoFont})`);
-
-      Promise.all([marckScriptFont.load(), nunitoFont.load()]).then(([loadedMarckScript, loadedNunito]) => {
-        document.fonts.add(loadedMarckScript);
-        document.fonts.add(loadedNunito);
-
-        // Настройки текста имени студента (адаптируйте координаты и стили)
-        ctx.font = 'italic bold 100px MarckScript, sans-serif';
-        ctx.fillStyle = '#800080'; // Фиолетовый цвет
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(studentName, canvas.width / 2 + 500, canvas.height / 2 - 15); // Координаты из AddSertificateForm.vue
-
-        // Настройки текста даты (адаптируйте координаты и стили)
-        ctx.font = 'bold 55px Nunito, sans-serif';
-        ctx.fillStyle = '#FFFFFF';
-        ctx.textAlign = 'right';
-        ctx.textBaseline = 'bottom';
-        const certificateDate = new Date(certificate.created_at); // Используем дату из сертификата
-        const dateText = formatDate(certificateDate);
-        const dateLines = dateText.split('\n');
-        const dateX = canvas.width - 480; // Координаты из AddSertificateForm.vue
-        const dateY = canvas.height - 235; // Координаты из AddSertificateForm.vue
-        ctx.fillText(dateLines[0], dateX, dateY - 65);
-        ctx.fillText(dateLines[1], dateX, dateY);
-
-        const pdf = new jsPDF({
-          orientation: img.width > img.height ? 'landscape' : 'portrait',
-          unit: 'px',
-          format: [img.width, img.height]
-        });
-
-        pdf.addFont(MarckScriptFont, 'MarckScript', 'normal');
-        pdf.addFont(NunitoFont, 'Nunito', 'normal');
-        pdf.setFont('MarckScript'); // Устанавливаем шрифт по умолчанию для PDF
-        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, img.width, img.height);
-        pdf.save(`Certificate_${studentName}_${certificate.direction_name}_${certificate.level_name}.pdf`); // Используем данные сертификата для имени файла
-        resolve();
-      }).catch(reject);
-    };
-    img.onerror = () => reject(new Error(`Failed to load image for PDF: ${imagePath}`));
-  });
+  // Открываем модальное окно с URL изображения и передаем ПОЛНЫЕ ДАННЫЕ сертификата и имя студента
+  openImageViewerModal(imagePath, certificate, studentName);
 };
 
 </script>
@@ -309,7 +248,7 @@ const generateCertificatePdf = async (certificate: any, studentName: string): Pr
             :key="certificate.id !== undefined && certificate.id !== null && !isNaN(certificate.id) ? certificate.id : `${studentData.first_name}-${studentData.last_name}-cert-${certIndex}`"
             class="certificate-card"
             :class="getCertificateCardClass(certificate)"
-            @click="generateCertificatePdf(certificate, `${studentData.first_name} ${studentData.last_name}`)" >
+            @click="showCertificateImageInModal(certificate, `${studentData.first_name} ${studentData.last_name}`)" >
           <div class="certificate-image">
             <img :src="getCertificateImagePath(certificate.image)" alt="Certificate Icon" v-if="getCertificateImagePath(certificate.image)">
             <p v-else>Изображение не найдено</p>
@@ -321,6 +260,14 @@ const generateCertificatePdf = async (certificate: any, studentName: string): Pr
         </div>
       </template>
     </div>
+
+    <ImageViewerModal
+        :image-url="currentImageUrl"
+        :show-modal="showImageViewerModal"
+        :certificate-data="currentCertificateData"
+        :student-name="currentStudentName"
+        @close="closeImageViewerModal"
+    />
   </div>
 </template>
 
@@ -424,7 +371,6 @@ const generateCertificatePdf = async (certificate: any, studentName: string): Pr
     }
 
     // --- Стили для фоновых цветов в зависимости от level_name ---
-    // Убедитесь, что `certificate.level_name` соответствует этим строкам
     &.level-junior {
       background-color: #FCE4EC;
     }
