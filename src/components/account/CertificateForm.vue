@@ -2,6 +2,11 @@
 import { onMounted, watch } from 'vue';
 import { useCertificatesStore } from '@/stores/certificates';
 import { storeToRefs } from 'pinia';
+import { jsPDF } from 'jspdf'; // Импорт jspdf
+
+// --- Импорт шрифтов (скопировано из AddSertificateForm.vue) ---
+import NunitoFont from '@/assets/fonts/Nunito-VariableFont_wght.ttf';
+import MarckScriptFont from '@/assets/fonts/MarckScript-Regular.ttf';
 
 // --- Импорт всех изображений для сертификатов ---
 // Эти пути остаются, как они есть у вас на диске
@@ -53,7 +58,7 @@ import SpeedReadingSpeechTherapyUk from "@/assets/backgrounds/certificate-level-
 // --- Карта изображений для сопоставления ---
 // СДЕЛАНО ТОЧНО ТАК ЖЕ, КАК В AddSertificateForm.vue
 const imageMap: Record<string, string> = {
-  itGeliosStartEn, SpeechTherapyEn, MentalArithmeticEn, MentalArithmeticEn1, MentalArithmeticEn2, MentalArithmeticEn3, MentalArithmeticEn4,
+  itGeliosStartEn, SchooolPreparationEn, SpeechTherapyEn, MentalArithmeticEn, MentalArithmeticEn1, MentalArithmeticEn2, MentalArithmeticEn3, MentalArithmeticEn4,
   MultiplicationandDivisionEn, SpeedReadingEn, SpeedReadingEn1, SpeedReadingEn2, SpeedReadingEn3, SpeedReadingEn4, SpeedReadingEn5, SpeedReadingEn6,
   SpeedReadingSpeechTherapyEn, SpeedReadingSpeechTherapyEn1, SpeedReadingSpeechTherapyEn2, SpeedReadingSpeechTherapyEn3, SpeedReadingSpeechTherapyEn4,
   SpeedReadingSpeechTherapyEn5, SpeedReadingSpeechTherapyEn6, itGeliosStartUk, SpeechTherapyUk, MentalArithmeticUk, MentalArithmeticUk1, MentalArithmeticUk2,
@@ -69,7 +74,7 @@ const getCertificateImagePath = (imageNameFromBackend: string): string | undefin
   }
 
   console.log(`[getCertificateImagePath] Запрос для ключа: "${imageNameFromBackend}"`);
-  const path = imageMap[imageNameFromBackend]; // Теперь path будет импортированным URL (например, "/src/assets/...")
+  const path = imageMap[imageNameFromBackend];
   if (path) {
     console.log(`[getCertificateImagePath] Найден путь для "${imageNameFromBackend}": ${path}`);
   } else {
@@ -81,7 +86,7 @@ const getCertificateImagePath = (imageNameFromBackend: string): string | undefin
 
 
 const certificatesStore = useCertificatesStore();
-const { getStudentCertificates: studentCertificates, loading, error } = storeToRefs(certificatesStore);
+const { getStudentCertificates: studentCertificates, loading, error } = storeToRefs(certificatesStore); //
 
 onMounted(() => {
   console.log('CertificateForm: Компонент смонтирован, запускаю fetchStudentCertificates.');
@@ -124,13 +129,158 @@ watch([studentCertificates, loading, error], ([newCertificates, newLoading, newE
     });
   }
 }, { deep: true, immediate: true });
+
+// Функция для определения классов карточек
+const getCertificateCardClass = (certificate: any) => {
+  const classes: string[] = [];
+  // Добавление класса для фона в зависимости от уровня
+  // Вам нужно будет адаптировать эту логику под ваши конкретные уровни/направления
+  // и цвета, если они не являются фиксированными строками, как здесь.
+  switch (certificate.level_name) {
+    case 'Джуніор': // Пример из скриншота
+      classes.push('level-junior');
+      break;
+    case 'Базовий': // Пример из скриншота
+      classes.push('level-basic');
+      break;
+    case 'Основний': // Пример из скриншота
+      classes.push('level-main');
+      break;
+    case 'Просунутий': // Пример из скриншота
+      classes.push('level-advanced');
+      break;
+    case 'Повний курс': // Пример из скриншота
+      // Может быть оранжевый или фиолетовый, как на скриншоте. Определитесь с логикой.
+      // Если "Повний курс" может быть разных цветов, нужно дополнительное поле в данных
+      // Здесь предполагаем, что сертификат с ID 5 (IT Gelios Start) имеет фиолетовый фон
+      // А другой "Повний курс" (если такой будет) будет оранжевым, или нужен признак с бэкенда
+      if (certificate.id === 5) { // ID для "IT Gelios Start"
+        classes.push('level-full-course'); // Фиолетовый
+      } else {
+        classes.push('level-full-course-orange'); // Оранжевый (если по умолчанию)
+      }
+      break;
+    case 'Прямий рахунок':
+      classes.push('level-direct-account');
+      break;
+    case 'Молоді друзі':
+      classes.push('level-young-friends');
+      break;
+    case 'Старші друзі':
+      classes.push('level-old-friends');
+      break;
+    case 'Комбінації':
+      classes.push('level-combinations');
+      break;
+    case 'Ерудит':
+      classes.push('level-erudit');
+      break;
+    case 'Профі':
+      classes.push('level-profi');
+      break;
+    default:
+      // classes.push('level-default');
+      break;
+  }
+
+  // Если есть поле is_locked в данных сертификата (пример)
+  // В AddSertificateForm.vue нет такого поля в Certificates, вам нужно, чтобы бэкенд его предоставлял
+  if (certificate.is_locked) {
+    classes.push('locked');
+  }
+  return classes;
+};
+
+// --- Функция для форматирования даты (скопировано из AddSertificateForm.vue) ---
+const formatDate = (date: Date): string => {
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}.${month}\n${year}`;
+};
+
+// --- Функция генерации PDF (скопировано из AddSertificateForm.vue) ---
+// Принимает объект сертификата, чтобы получить его изображение и данные
+const generateCertificatePdf = async (certificate: any, studentName: string): Promise<void> => {
+  if (!certificate || !certificate.image) {
+    const errorMsg = `Недостаточно данных для генерации PDF сертификата: ${certificate?.id || 'N/A'}`;
+    console.error(errorMsg);
+    throw new Error(errorMsg);
+  }
+
+  const imagePath = getCertificateImagePath(certificate.image); // Получаем путь к изображению
+  if (!imagePath) {
+    const errorMsg = `Изображение для сертификата "${certificate.image}" не найдено в imageMap.`;
+    console.error(errorMsg);
+    throw new Error(errorMsg);
+  }
+
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous'; // Важно для загрузки изображений с других доменов (если применимо)
+    img.src = imagePath; // Используем найденный путь к изображению
+
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return reject(new Error('Failed to get canvas context'));
+
+      ctx.drawImage(img, 0, 0);
+
+      const marckScriptFont = new FontFace('MarckScript', `url(${MarckScriptFont})`);
+      const nunitoFont = new FontFace('Nunito', `url(${NunitoFont})`);
+
+      Promise.all([marckScriptFont.load(), nunitoFont.load()]).then(([loadedMarckScript, loadedNunito]) => {
+        document.fonts.add(loadedMarckScript);
+        document.fonts.add(loadedNunito);
+
+        // Настройки текста имени студента (адаптируйте координаты и стили)
+        ctx.font = 'italic bold 100px MarckScript, sans-serif';
+        ctx.fillStyle = '#800080'; // Фиолетовый цвет
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(studentName, canvas.width / 2 + 500, canvas.height / 2 - 15); // Координаты из AddSertificateForm.vue
+
+        // Настройки текста даты (адаптируйте координаты и стили)
+        ctx.font = 'bold 55px Nunito, sans-serif';
+        ctx.fillStyle = '#FFFFFF';
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'bottom';
+        const certificateDate = new Date(certificate.created_at); // Используем дату из сертификата
+        const dateText = formatDate(certificateDate);
+        const dateLines = dateText.split('\n');
+        const dateX = canvas.width - 480; // Координаты из AddSertificateForm.vue
+        const dateY = canvas.height - 235; // Координаты из AddSertificateForm.vue
+        ctx.fillText(dateLines[0], dateX, dateY - 65);
+        ctx.fillText(dateLines[1], dateX, dateY);
+
+        const pdf = new jsPDF({
+          orientation: img.width > img.height ? 'landscape' : 'portrait',
+          unit: 'px',
+          format: [img.width, img.height]
+        });
+
+        pdf.addFont(MarckScriptFont, 'MarckScript', 'normal');
+        pdf.addFont(NunitoFont, 'Nunito', 'normal');
+        pdf.setFont('MarckScript'); // Устанавливаем шрифт по умолчанию для PDF
+        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, img.width, img.height);
+        pdf.save(`Certificate_${studentName}_${certificate.direction_name}_${certificate.level_name}.pdf`); // Используем данные сертификата для имени файла
+        resolve();
+      }).catch(reject);
+    };
+    img.onerror = () => reject(new Error(`Failed to load image for PDF: ${imagePath}`));
+  });
+};
+
 </script>
 
 <template>
   <div class="certificate-form">
     <div class="certificate-header">
       <div class="dropdown">
-        <label for="filter-certificates">Всі</label>
+        <label for="filter-certificates">Вибрати предмет</label>
         <select id="filter-certificates">
           <option value="all">Всі</option>
           <option value="completed">Завершено</option>
@@ -142,6 +292,9 @@ watch([studentCertificates, loading, error], ([newCertificates, newLoading, newE
           </svg>
         </span>
       </div>
+      <button class="filter-button active">Всі</button>
+      <button class="filter-button">Відкриті</button>
+      <button class="filter-button">Закриті</button>
     </div>
 
     <div v-if="loading" class="loading-message">Загрузка сертификатов...</div>
@@ -155,17 +308,16 @@ watch([studentCertificates, loading, error], ([newCertificates, newLoading, newE
             v-for="(certificate, certIndex) in studentData.certificates"
             :key="certificate.id !== undefined && certificate.id !== null && !isNaN(certificate.id) ? certificate.id : `${studentData.first_name}-${studentData.last_name}-cert-${certIndex}`"
             class="certificate-card"
-        >
+            :class="getCertificateCardClass(certificate)"
+            @click="generateCertificatePdf(certificate, `${studentData.first_name} ${studentData.last_name}`)" >
           <div class="certificate-image">
             <img :src="getCertificateImagePath(certificate.image)" alt="Certificate Icon" v-if="getCertificateImagePath(certificate.image)">
             <p v-else>Изображение не найдено</p>
+            <i v-if="certificate.is_locked" class="lock-icon material-icons">lock</i>
           </div>
           <div class="certificate-title">
-            {{ certificate.direction_name }} - {{ certificate.level_name }}
+            {{ certificate.level_name }}
           </div>
-          <p class="certificate-date">
-            Выдан: {{ new Date(certificate.created_at).toLocaleDateString('uk-UA') }}
-          </p>
         </div>
       </template>
     </div>
@@ -173,7 +325,6 @@ watch([studentCertificates, loading, error], ([newCertificates, newLoading, newE
 </template>
 
 <style scoped lang="scss">
-/* Стили остаются без изменений */
 .certificate-form {
   padding: 20px;
 }
@@ -181,7 +332,8 @@ watch([studentCertificates, loading, error], ([newCertificates, newLoading, newE
 .certificate-header {
   margin-bottom: 30px;
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
+  align-items: center;
 
   .dropdown {
     display: flex;
@@ -191,6 +343,7 @@ watch([studentCertificates, loading, error], ([newCertificates, newLoading, newE
     padding: 8px 15px;
     border-radius: 12px;
     position: relative;
+    cursor: pointer;
 
     label {
       font-weight: 500;
@@ -217,12 +370,37 @@ watch([studentCertificates, loading, error], ([newCertificates, newLoading, newE
       pointer-events: none;
     }
   }
+
+  .filter-button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 14px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+
+    &.active {
+      background-color: #0066FF;
+      color: white;
+    }
+
+    &:not(.active) {
+      background-color: #F0F0F0;
+      color: #5F6D7E;
+    }
+
+    &:hover:not(.active) {
+      background-color: #e0e0e0;
+    }
+  }
 }
 
 .certificates-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 15px;
+  padding-top: 20px;
 
   .certificate-card {
     background-color: #F8F8FC;
@@ -230,51 +408,115 @@ watch([studentCertificates, loading, error], ([newCertificates, newLoading, newE
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-between;
-    padding: 15px;
+    justify-content: flex-start;
+    padding: 10px;
     text-align: center;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.05);
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.08);
     cursor: pointer;
-    transition: transform 0.2s ease-in-out;
-    height: 220px;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease;
+    height: 180px;
     position: relative;
     overflow: hidden;
 
     &:hover {
       transform: translateY(-5px);
+      box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.12);
     }
 
-    .certificate-image {
-      width: 100%;
-      height: 120px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-bottom: 10px;
+    // --- Стили для фоновых цветов в зависимости от level_name ---
+    // Убедитесь, что `certificate.level_name` соответствует этим строкам
+    &.level-junior {
+      background-color: #FCE4EC;
+    }
+    &.level-basic {
+      background-color: #EDE7F6;
+    }
+    &.level-main {
+      background-color: #E3F2FD;
+    }
+    &.level-advanced {
+      background-color: #FFF3E0;
+    }
+    &.level-erudit {
+      background-color: #E0F2F7;
+    }
+    &.level-profi {
+      background-color: #F3E5F5;
+    }
+    &.level-full-course { // Фиолетовый "Повний курс"
+      background-color: #EDE7F6;
+    }
+    &.level-direct-account { // Прямий рахунок - оранжевый
+      background-color: #FFF3E0;
+    }
+    &.level-young-friends { // Молоді друзі - розовый
+      background-color: #FCE4EC;
+    }
+    &.level-old-friends { // Старші друзі - голубой
+      background-color: #E3F2FD;
+    }
+    &.level-combinations { // Комбінації - оранжевый
+      background-color: #FFF3E0;
+    }
+    &.level-full-course-orange { // Отдельный оранжевый "Повний курс"
+      background-color: #FFE0B2;
+    }
 
-      img {
-        max-width: 100%;
-        max-height: 100%;
-        object-fit: cover;
-        border-radius: 8px;
+
+    // Стили для заблокированных карточек
+    &.locked {
+      background-color: #CFD8DC;
+      opacity: 0.8;
+      cursor: not-allowed;
+      .certificate-image {
+        filter: grayscale(100%);
+        opacity: 0.6;
       }
-      p {
-        font-size: 12px;
-        color: #999;
+      .lock-icon {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #546E7A;
+        font-size: 3em;
+        z-index: 10;
       }
     }
+  }
 
-    .certificate-title {
-      font-weight: 600;
-      font-size: 14px;
-      color: #333;
+  .certificate-image {
+    width: 100%;
+    height: 110px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 5px;
+
+    img {
+      max-width: 90%;
+      max-height: 90%;
+      object-fit: contain;
+      border-radius: 8px;
     }
-
-    .certificate-date {
+    p {
       font-size: 12px;
-      color: #777;
-      margin-top: 5px;
+      color: #999;
     }
+  }
+
+  .certificate-title {
+    font-weight: 500;
+    font-size: 14px;
+    color: #333;
+    margin-top: auto;
+    margin-bottom: 0;
+    padding: 0 5px 10px;
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  .certificate-date {
+    display: none;
   }
 }
 
