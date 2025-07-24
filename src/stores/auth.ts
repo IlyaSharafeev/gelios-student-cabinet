@@ -58,7 +58,7 @@ export const useAuthStore = defineStore('auth', {
                 this.isAuthenticated = true;
                 if (this.token) {
                     localStorage.setItem('token', this.token);
-                    localStorage.setItem('refreshToken', response.data.refreshToken)
+                    localStorage.setItem('refreshToken', response.data.refresh_token)
                 }
                 this.error = null;
                 return {success: true};
