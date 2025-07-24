@@ -11,7 +11,7 @@ onMounted(() => {
       console.log('Iframe loaded. Sending messages...');
       if (iframeElement.contentWindow) {
         // --- 1. Send the correct API Base URL ---
-        const correctBaseURL = 'https://gelios-teacher.ddns.net/api';
+        const correctBaseURL = 'https://test-crm.gelios-school.com/server/api';
         // Добавьте correctRefreshTokenURL, если он отличается от correctBaseURL
         const correctRefreshTokenURL = 'https://gelios-teacher.ddns.net/api'; // Пример: тот же URL
         iframeElement.contentWindow.postMessage({
