@@ -41,11 +41,6 @@ const handleLogout = () => {
           {{ t('certificate') }}
         </button>
       </div>
-
-      <div class="logout-button" @click="handleLogout">
-        <div class="logout-icon"></div>
-        <div>{{ t('logout') }}</div>
-      </div>
     </div>
 
     <div class="content">
