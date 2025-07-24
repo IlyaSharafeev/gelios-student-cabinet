@@ -1,7 +1,43 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 
 const iframeUrl = ref('https://gelios-calendar-lib.netlify.app/');
+
+onMounted(() => {
+  const iframeElement = document.querySelector('iframe'); // Get the iframe element
+
+  if (iframeElement) {
+    iframeElement.onload = () => { // Ensure the iframe content is loaded before sending messages
+      console.log('Iframe loaded. Sending messages...');
+      if (iframeElement.contentWindow) {
+        // --- 1. Send the correct API Base URL ---
+        const correctBaseURL = 'https://test-crm.gelios-school.com/server/api';
+        iframeElement.contentWindow.postMessage({
+          type: 'SET_API_BASE_URL',
+          baseURL: correctBaseURL
+        }, 'https://gelios-calendar-lib.netlify.app'); // Specify the exact origin of your iframe
+
+        // --- 2. Send Authentication Tokens ---
+        // IMPORTANT: Replace these with your actual tokens obtained from the parent app's authentication system.
+        // For demonstration, using placeholders. In a real app, these would come from your parent app's auth state.
+        const accessToken = localStorage.getItem('token');
+        const refreshToken = localStorage.getItem('refreshToken');
+
+        iframeElement.contentWindow.postMessage({
+          type: 'SET_AUTH_TOKENS',
+          accessToken: accessToken,
+          refreshToken: refreshToken
+        }, 'https://gelios-calendar-lib.netlify.app'); // Specify the exact origin of your iframe
+
+        console.log('API Base URL and Tokens sent to iframe.');
+      } else {
+        console.error("Iframe contentWindow is not accessible.");
+      }
+    };
+  } else {
+    console.error("Iframe element not found in SchedulePage.");
+  }
+});
 </script>
 
 <template>
