@@ -12,9 +12,12 @@ onMounted(() => {
       if (iframeElement.contentWindow) {
         // --- 1. Send the correct API Base URL ---
         const correctBaseURL = 'https://gelios-teacher.ddns.net/api';
+        // Добавьте correctRefreshTokenURL, если он отличается от correctBaseURL
+        const correctRefreshTokenURL = 'https://gelios-teacher.ddns.net/api'; // Пример: тот же URL
         iframeElement.contentWindow.postMessage({
           type: 'SET_API_BASE_URL',
-          baseURL: correctBaseURL
+          baseURL: correctBaseURL,
+          refreshTokenURL: correctRefreshTokenURL // Отправляем также URL для рефреша
         }, 'https://gelios-calendar-lib.netlify.app'); // Specify the exact origin of your iframe
 
         // --- 2. Send Authentication Tokens ---
