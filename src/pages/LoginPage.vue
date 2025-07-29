@@ -245,7 +245,7 @@ watch(route, () => {
           <div class="refresh" @click="showPasswordRecovery">{{ t("login.form.recover") }}</div>
         </div>
       </div>
-      <div class="button-register" @click="router.push('/register')">Реєстрація</div>
+      <div class="button-register" @click="router.push('/register')">{{ t('login.form.register_button') }}</div>
     </div>
 
     <div class="password-reset" v-else-if="isResetPasswordVisible">
@@ -418,9 +418,9 @@ watch(route, () => {
 
       .woman-lego {
         position: absolute;
-        bottom: -35px;
-        background-image: url("@/assets/images/lego-models/woman-with-roses.png");
-        background-size: cover;
+        bottom: -85px;
+        background-image: url("@/assets/images/lego-models/men-with-book.png");
+        background-size: contain;
         background-position: center;
         background-repeat: no-repeat;
         width: 376px;
@@ -1088,7 +1088,7 @@ watch(route, () => {
   text-align: center;
   border-radius: 16px;
   cursor: pointer;
-  
+
   &:hover {
     background: #353639;
   }

@@ -10,14 +10,14 @@ import { useRouter } from "vue-router";
 import { useNotification } from "@kyvg/vue3-notification";
 import { useI18n } from "vue-i18n";
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const { notify } = useNotification();
 const phoneNumber = helpers.regex(/^\+?[1-9]\d{1,14}$/); // Simple phone number regex (e.g., +380123456789)
 const router = useRouter();
 const errorMessage = ref<string | null>(null);
 
 const selectOptions = [
-  { value: "ua", label: t("language.uk"), icon: ukrainianLanguageIcon },
+  { value: "uk", label: t("language.uk"), icon: ukrainianLanguageIcon },
   { value: "en", label: t("language.en"), icon: englishLanguageIcon },
 ];
 
@@ -69,6 +69,7 @@ const onRegisterSubmit = async () => {
 
 watch(selectedValueLanguage, (newValue) => {
   localStorage.setItem("selectedLanguage", newValue);
+  locale.value = newValue;
 });
 </script>
 
