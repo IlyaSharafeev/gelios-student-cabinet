@@ -463,14 +463,12 @@ onMounted(() => {
     }
 
     &-text {
-      font-family: Onest;
-      font-weight: 400;
+      font-weight: 600;
       font-style: Regular;
+      letter-spacing: 2px;
       font-size: 16px;
-      leading-trim: NONE;
       line-height: 121%;
       letter-spacing: 0%;
-      opacity: 0.5;
     }
   }
 }

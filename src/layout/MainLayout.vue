@@ -174,9 +174,7 @@ const showBackgroundElements = computed(() => {
   background-position: center;
   background-repeat: no-repeat;
   min-height: 100vh;
-  background: #A0E3FF;
-  background: -webkit-linear-gradient(90deg, #A0E3FF 0%, #49A7FF 100%);
-  background: linear-gradient(90deg, #A0E3FF 0%, #49A7FF 100%);
+  background: linear-gradient(to bottom right, #aebfff, #e6d9ff);
   overflow: hidden;
 }
 
