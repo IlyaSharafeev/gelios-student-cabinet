@@ -33,6 +33,16 @@ onMounted(() => {
         }, 'https://gelios-calendar-lib.netlify.app'); // Specify the exact origin of your iframe
 
         console.log('API Base URL and Tokens sent to iframe.');
+
+        const viewMode = 'student';
+
+        iframeElement.contentWindow.postMessage({
+          type: 'SET_VIEW_MODE',
+          viewMode: viewMode
+        }, 'https://gelios-calendar-lib.netlify.app/');
+
+        localStorage.setItem('viewMode', viewMode);
+
       } else {
         console.error("Iframe contentWindow is not accessible.");
       }
