@@ -38,8 +38,8 @@ const slugify = (text: string): string => {
 };
 
 const trainers: Trainer[] = [
-  { id: 1, name: 'Знайди пару', slug: slugify('Знайди пару'), image: trainer1, iframeUrl: import.meta.env.VITE_ABACUS_URL, backgroundColor: '#0066FF' },
-  { id: 2, name: 'Тест швидкості читання', slug: slugify('Тест швидкості читання'), image: trainer2, iframeUrl: import.meta.env.VITE_ALPHABET_URL, backgroundColor: '#FF7B7B' },
+  { id: 1, name: 'Знайди пару', slug: slugify('Знайди пару'), image: trainer1, iframeUrl: import.meta.env.VITE_MEMO, backgroundColor: '#0066FF' },
+  { id: 2, name: 'Тест швидкості читання', slug: slugify('Тест швидкості читання'), image: trainer2, iframeUrl: import.meta.env.VITE_READING_SPEED_TEST, backgroundColor: '#FF7B7B' },
   { id: 3, name: 'Таблиця Шульте', slug: slugify('Таблиця Шульте'), image: trainer3, iframeUrl: import.meta.env.VITE_SCHULTE_TABLE_URL, backgroundColor: '#FF7A00' },
   { id: 4, name: 'Spritz', slug: slugify('Spritz'), image: trainer4, iframeUrl: import.meta.env.VITE_SPRITZ_URL, backgroundColor: '#FFDF39' },
   { id: 5, name: 'Ментальна арифметика', slug: slugify('Ментальна арифметика'), image: trainer5, iframeUrl: import.meta.env.VITE_SPEED_MATH_URL, backgroundColor: '#0066FF' },
