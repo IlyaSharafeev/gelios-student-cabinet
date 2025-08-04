@@ -15,21 +15,37 @@ export const useAuthStore = defineStore('auth', {
     }),
 
     actions: {
+        async fetchProfile() {
+            if (!this.token) {
+                return;
+            }
+            try {
+                const response = await axios.get(`${baseURL}/api/student/profile`, {
+                    headers: {
+                        Authorization: `Bearer ${this.token}`,
+                    },
+                });
+                this.user = response.data; // Сохраняем данные пользователя из профиля
+                this.isAuthenticated = true;
+            } catch (error) {
+                console.error('Ошибка загрузки профиля:', error);
+                this.logout(); // Если токен невалидный, выходим из системы
+            }
+        },
+
         async register({email, username, contactNumber, password}) {
-            console.log({email, username, contactNumber, password});
             try {
                 const response = await axios.post(`${baseURL}/api/auth/student/register`, {
-                        email,
-                        firstName: username,
-                        lastName: username,
-                        phone: Array.isArray(contactNumber) ? contactNumber : [contactNumber],
-                        password,
+                    email,
+                    firstName: username,
+                    lastName: username,
+                    phone: Array.isArray(contactNumber) ? contactNumber : [contactNumber],
+                    password,
                 });
                 this.token = response.data.token;
-                this.user = response.data.user;
-                this.isAuthenticated = true;
                 if (this.token) {
                     localStorage.setItem('token', this.token);
+                    await this.fetchProfile(); // Загружаем полный профиль после регистрации
                 }
                 this.error = null;
                 return {success: true};
@@ -52,13 +68,11 @@ export const useAuthStore = defineStore('auth', {
                     email,
                     password,
                 });
-                console.log(response);
                 this.token = response.data.access_token;
-                this.user = response.data.user;
-                this.isAuthenticated = true;
                 if (this.token) {
                     localStorage.setItem('token', this.token);
                     localStorage.setItem('refreshToken', response.data.refresh_token)
+                    await this.fetchProfile(); // Загружаем профиль после логина
                 }
                 this.error = null;
                 return {success: true};
@@ -113,12 +127,14 @@ export const useAuthStore = defineStore('auth', {
             this.user = null;
             this.token = null;
             localStorage.removeItem('token');
+            localStorage.removeItem('refreshToken');
         },
 
         initializeAuth() {
-            if (this.token) {
-                this.isAuthenticated = true;
-                // Можно добавить запрос для проверки токена и получения данных пользователя
+            const token = localStorage.getItem('token');
+            if (token) {
+                this.token = token;
+                this.fetchProfile(); // При инициализации приложения загружаем профиль, если есть токен
             }
         },
     },

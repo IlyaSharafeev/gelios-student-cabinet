@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import {ref, onMounted} from 'vue'; // Import onMounted
+import {ref, onMounted, computed} from 'vue'; // Import onMounted and computed
 import {useI18n} from "vue-i18n";
 import AOS from 'aos'; // Import AOS
 import 'aos/dist/aos.css'; // Import AOS CSS
+import {useAuthStore} from "@/stores/auth"; // Импортируем хранилище
 
 interface Statistic {
   title: string;
@@ -83,7 +84,13 @@ const courses: Course[] = [
   {title: "Хімія", teacher: "Сидоренко В.В.", progress: "8", total: "15", isLocked: false, progressColor: 'green'},
 ];
 
+const authStore = useAuthStore();
 const {t} = useI18n();
+
+// Вычисляемые свойства для имени и монет ученика
+// Предполагается, что объект user содержит поля `firstName` и `coins`
+const studentName = computed(() => authStore.user?.first_name || '...');
+const studentCoins = computed(() => authStore.user?.coins || 0);
 
 const coursesContainer = ref<HTMLElement | null>(null);
 
@@ -107,8 +114,12 @@ const scrollDown = () => {
   }
 };
 
-// Initialize AOS when the component is mounted
+// Initialize AOS and fetch profile when the component is mounted
 onMounted(() => {
+  if (!authStore.user) {
+    authStore.fetchProfile();
+  }
+
   AOS.init({
     // Optional: Add your AOS configuration here
     duration: 800, // values from 0 to 3000, with step 50ms
@@ -121,7 +132,7 @@ onMounted(() => {
   <div class="dashboard">
     <div class="dashboard__columns">
       <div class="dashboard__column dashboard__column--direction">
-        <div class="dashboard__direction-title" data-aos="fade-right"> {{ t('dashboard.greeting') }}, Остап
+        <div class="dashboard__direction-title" data-aos="fade-right"> {{ t('dashboard.greeting') }}, {{ studentName }}
         </div>
         <div class="dashboard__direction-content-wrapper">
           <div class="dashboard__scroll-buttons">
@@ -144,7 +155,8 @@ onMounted(() => {
                 :key="index"
                 :class="['dashboard__course-block', { 'dashboard__course-block--locked': course.isLocked }]"
             >
-              <div class="dashboard__course-block-content" :class="{'dashboard__course-block-content--locked': course.isLocked}">
+              <div class="dashboard__course-block-content"
+                   :class="{'dashboard__course-block-content--locked': course.isLocked}">
                 <h4 class="dashboard__course-block-title">{{ course.title }}</h4>
                 <div v-if="!course.isLocked" class="dashboard__course-block-details-wrapper">
                   <div class="dashboard__course-block-details">
@@ -152,13 +164,15 @@ onMounted(() => {
                     <span class="dashboard__course-block-label">{{ t('dashboard.teacher_label') }}</span>
                   </div>
                   <div
-                       :class="['dashboard__course-block-progress', `dashboard__course-block-progress--${course.progressColor}`]">
+                      :class="['dashboard__course-block-progress', `dashboard__course-block-progress--${course.progressColor}`]">
                     {{ course.progress }}/{{ course.total }}
                   </div>
                 </div>
                 <div v-else class="dashboard__course-block-lock-icon">
                   <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M28.3337 16.6667V13.3333C28.3337 8.73096 24.6027 5 20.0003 5C15.398 5 11.667 8.73096 11.667 13.3333V16.6667M20.0003 24.1667V27.5M14.667 35H25.3337C28.1339 35 29.5341 35 30.6036 34.455C31.5444 33.9757 32.3093 33.2108 32.7887 32.27C33.3337 31.2004 33.3337 29.8003 33.3337 27V24.6667C33.3337 21.8664 33.3337 20.4663 32.7887 19.3967C32.3093 18.4559 31.5444 17.691 30.6036 17.2116C29.5341 16.6667 28.1339 16.6667 25.3337 16.6667H14.667C11.8667 16.6667 10.4666 16.6667 9.39704 17.2116C8.45623 17.691 7.69133 18.4559 7.21196 19.3967C6.66699 20.4663 6.66699 21.8664 6.66699 24.6667V27C6.66699 29.8003 6.66699 31.2004 7.21196 32.27C7.69133 33.2108 8.45623 33.9757 9.39704 34.455C10.4666 35 11.8667 35 14.667 35Z" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path
+                        d="M28.3337 16.6667V13.3333C28.3337 8.73096 24.6027 5 20.0003 5C15.398 5 11.667 8.73096 11.667 13.3333V16.6667M20.0003 24.1667V27.5M14.667 35H25.3337C28.1339 35 29.5341 35 30.6036 34.455C31.5444 33.9757 32.3093 33.2108 32.7887 32.27C33.3337 31.2004 33.3337 29.8003 33.3337 27V24.6667C33.3337 21.8664 33.3337 20.4663 32.7887 19.3967C32.3093 18.4559 31.5444 17.691 30.6036 17.2116C29.5341 16.6667 28.1339 16.6667 25.3337 16.6667H14.667C11.8667 16.6667 10.4666 16.6667 9.39704 17.2116C8.45623 17.691 7.69133 18.4559 7.21196 19.3967C6.66699 20.4663 6.66699 21.8664 6.66699 24.6667V27C6.66699 29.8003 6.66699 31.2004 7.21196 32.27C7.69133 33.2108 8.45623 33.9757 9.39704 34.455C10.4666 35 11.8667 35 14.667 35Z"
+                        stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>
                 </div>
               </div>
@@ -180,7 +194,7 @@ onMounted(() => {
             </svg>
           </div>
           <div class="dashboard__coins-content">
-            <div class="dashboard__coins-content-number">93645</div>
+            <div class="dashboard__coins-content-number">{{ studentCoins }}</div>
             <div class="dashboard__coins-content-text">{{ t('dashboard.balance') }}</div>
           </div>
         </div>
@@ -314,7 +328,7 @@ onMounted(() => {
     color: #FFFFFF;
     opacity: 70%;
     backdrop-filter: blur(20px);
-    
+
     .dashboard__course-block-title {
       color: #FFFFFF;
     }
@@ -326,7 +340,7 @@ onMounted(() => {
     gap: 24px;
     flex-direction: column;
     align-items: flex-start;
-    
+
     &--locked {
       flex-direction: row;
       align-items: center;
@@ -364,7 +378,7 @@ onMounted(() => {
     line-height: 100%;
     letter-spacing: 0%;
   }
-  
+
   &-label {
     opacity: 70%;
     font-weight: 500;
