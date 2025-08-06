@@ -53,7 +53,7 @@ const trainers: Trainer[] = [
   { id: 13, name: 'Абакус', slug: slugify('Абакус'), image: trainer13, iframeUrl: import.meta.env.VITE_ABACUS_URL, backgroundColor: '#FFDF39' },
   { id: 14, name: 'Знайди кіберкішку', slug: slugify('Знайди кіберкішку'), image: trainer14, iframeUrl: import.meta.env.VITE_FIND_THE_CYBER_CAT_URL, backgroundColor: '#42D60E' },
   { id: 15, name: 'Мнемотехніка', slug: slugify('Мнемотехніка'), image: trainer15, iframeUrl: import.meta.env.VITE_MNEMONICS_URL, backgroundColor: '#0066FF' },
-  { id: 16, name: 'Множення & Ділення', slug: slugify('Множення & Ділення'), image: trainer16, iframeUrl: import.meta.env.VITE_COLUMNS_URL, backgroundColor: '#F47BFF' },
+  { id: 16, name: 'Множення & Ділення', slug: slugify('Множення & Ділення'), image: trainer16, iframeUrl: import.meta.env.VITE_MULTIPLICATION_AND_DIVISION, backgroundColor: '#F47BFF' },
 ];
 
 const isLoadingIframe = ref(false);
