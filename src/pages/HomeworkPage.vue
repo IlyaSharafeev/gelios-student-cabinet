@@ -29,12 +29,12 @@ const setActiveTab = (tab: string) => {
   <div class="settings-page">
     <div class="tabs-wrapper">
       <div class="tabs">
-        <button
-            :class="{ active: activeTab === 'classes' }"
-            @click="setActiveTab('classes')"
-        >
-          {{ t('tabs.classes') }}
-        </button>
+<!--        <button-->
+<!--            :class="{ active: activeTab === 'classes' }"-->
+<!--            @click="setActiveTab('classes')"-->
+<!--        >-->
+<!--          {{ t('tabs.classes') }}-->
+<!--        </button>-->
         <button
             :class="{ active: activeTab === 'homeworks' }"
             @click="setActiveTab('homeworks')"
@@ -51,7 +51,7 @@ const setActiveTab = (tab: string) => {
     </div>
 
     <div class="content" :class="{ 'no-background': activeTab === 'homeworks' }">
-      <ClassesPage v-if="activeTab === 'classes'" />
+<!--      <ClassesPage v-if="activeTab === 'classes'" />-->
       <HomeWorksPage v-if="activeTab === 'homeworks'" />
       <MaterialsPage v-if="activeTab === 'materials'" />
     </div>
