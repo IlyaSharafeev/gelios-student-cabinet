@@ -12,7 +12,6 @@
             <button class="materials__menu-item" :class="{'materials__menu-item--active': sort==='asc'}"  @click="setSort('asc')">Старі</button>
           </div>
         </div>
-
         <button class="materials__btn-refresh" title="Оновити" @click="refresh">
           <svg viewBox="0 0 24 24" class="materials__icon">
             <path d="M4 12a8 8 0 018-8 8 8 0 017.45 5h-2.2A6 6 0 006 12a6 6 0 0010.24 4.24l1.42 1.42A8 8 0 014 12z"/>
@@ -56,7 +55,28 @@
       </div>
     </div>
 
-    <div v-if="!loading" class="materials__lists">
+    <div v-if="loading" class="materials__lists">
+      <ul class="materials__col">
+        <li v-for="n in 5" :key="'s1'+n" class="materials__row">
+          <div class="materials__cell materials__cell--title">
+            <span class="materials__skeleton-ico"></span>
+            <span class="materials__skeleton-text"></span>
+          </div>
+          <span class="materials__skeleton-ico-btn"></span>
+        </li>
+      </ul>
+      <ul class="materials__col">
+        <li v-for="n in 5" :key="'s2'+n" class="materials__row">
+          <div class="materials__cell materials__cell--title">
+            <span class="materials__skeleton-ico"></span>
+            <span class="materials__skeleton-text"></span>
+          </div>
+          <span class="materials__skeleton-ico-btn"></span>
+        </li>
+      </ul>
+    </div>
+
+    <div v-else class="materials__lists">
       <ul class="materials__col">
         <li v-for="it in leftColumn" :key="it.id" class="materials__row">
           <div class="materials__cell materials__cell--title" @click="openItem(it)" role="button">
@@ -85,8 +105,6 @@
         </li>
       </ul>
     </div>
-
-    <div v-else class="materials__skeleton">Завантаження…</div>
 
     <div class="materials__pagination">
       <button class="materials__nav materials__nav--prev" :disabled="page===1" @click="page--" title="Назад">
@@ -219,8 +237,8 @@ function color(i:number){ return palette[i % palette.length] }
 
 async function fetchItems(force = false){
   loading.value = true
-  await new Promise(r => setTimeout(r, 350))
-  const count = 932 + (force ? Math.floor(Math.random()*6-3) : 0)
+  await new Promise(r => setTimeout(r, 650))
+  const count = 9322 + (force ? Math.floor(Math.random()*6-3) : 0)
   items.value = Array.from({length: count}).map((_,i) => {
     const dir = pick(directions)
     const tgs = [pick(allTags)]
@@ -249,8 +267,12 @@ $muted: #6b7280;
 $border: #e5e7eb;
 $primary: #3b82f6;
 
+@keyframes materials-skeleton-shimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
+}
+
 .materials {
-  //background: $bg;
   min-height: 100%;
   padding: 16px;
   display: flex;
@@ -267,7 +289,6 @@ $primary: #3b82f6;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    //box-shadow: 0 1px 0 rgba(0,0,0,.04);
   }
 
   &__sort{ display:flex; align-items:center; gap:10px; }
@@ -300,7 +321,6 @@ $primary: #3b82f6;
     position: absolute; top: 110%; left: 0; z-index: 10;
     background: #fff; border: 1px solid $border; border-radius: 12px;
     padding: 6px; min-width: 180px; box-shadow: 0 10px 30px rgba(0,0,0,.08);
-
     &--tags{ min-width: 220px; }
   }
 
@@ -317,7 +337,6 @@ $primary: #3b82f6;
     display:inline-flex; align-items:center; gap:6px;
     background:#f1f5f9; border:1px solid $border;
     padding:6px 10px; border-radius:999px; font-size:13px; cursor:pointer;
-
     &--add{ background:#eef2ff; border-color:#e0e7ff; }
     &-dot{
       width:8px; height:8px; border-radius:50%; background:$primary;
@@ -346,7 +365,6 @@ $primary: #3b82f6;
     display:flex; justify-content:space-between; align-items:center;
     padding:14px 12px; gap:8px;
     border-bottom:1px solid $border;
-
     &:last-child{ border-bottom: none; }
   }
 
@@ -388,12 +406,19 @@ $primary: #3b82f6;
     &:disabled{ opacity:.5; cursor:not-allowed; }
   }
 
-  &__skeleton{
-    background: $card;
-    border-radius:16px;
-    padding: 24px;
-    text-align:center; color: $muted;
+  &__skeleton-ico,
+  &__skeleton-ico-btn,
+  &__skeleton-text{
+    background: linear-gradient(90deg, #f2f4f7 25%, #e9edf3 50%, #f2f4f7 75%);
+    background-size: 200% 100%;
+    animation: materials-skeleton-shimmer 1.2s infinite linear;
+    display: block;
+    border-radius: 8px;
   }
+
+  &__skeleton-ico{ width:32px; height:32px; flex:0 0 32px; }
+  &__skeleton-ico-btn{ width:18px; height:18px; flex:0 0 18px; border-radius:6px; }
+  &__skeleton-text{ height:14px; width:70%; border-radius:6px; }
 
   @media (max-width: 900px){
     &__lists{ grid-template-columns: 1fr; }
