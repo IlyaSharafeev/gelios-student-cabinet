@@ -1,28 +1,46 @@
 <script setup lang="ts">
-import { onMounted, watch, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { useCertificatesStore } from '@/stores/certificates';
 import { storeToRefs } from 'pinia';
+import ImageViewerModal from '@/components/modal/PdfViewerModal.vue';
 
-// --- Импорт нового компонента модального окна ---
-import ImageViewerModal from '@/components/modal/PdfViewerModal.vue'; // Обновленный путь и имя
-
-// --- Импорт всех изображений для сертификатов ---
-import itGeliosStartEn from "@/assets/backgrounds/certificate-level-en/IT Gelios Start.png";
+// --- Импорты изображений на основе JSON ---
+import SpeechTherapyUk from "@/assets/backgrounds/certificate-level-uk/Логопедія.png";
+import MentalArithmeticUk1 from "@/assets/backgrounds/certificate-level-uk/Ментальна арифметика - 1.png";
+import MentalArithmeticUk2 from "@/assets/backgrounds/certificate-level-uk/Ментальна арифметика - 2.png";
+import MentalArithmeticUk3 from "@/assets/backgrounds/certificate-level-uk/Ментальна арифметика - 3.png";
+import MentalArithmeticUk4 from "@/assets/backgrounds/certificate-level-uk/Ментальна арифметика - 4.png";
+import MentalArithmeticUk from "@/assets/backgrounds/certificate-level-uk/Ментальна арифметика.png";
+import MultiplicationandDivisionUkr from "@/assets/backgrounds/certificate-level-uk/Множення і ділення.png";
 import SchooolPreparationEn from "@/assets/backgrounds/certificate-level-en/Підготовка до школи.png";
+import SpeedReadingUk1 from "@/assets/backgrounds/certificate-level-uk/Швидкочитання - 1.png";
+import SpeedReadingUk2 from "@/assets/backgrounds/certificate-level-uk/Швидкочитання - 2.png";
+import SpeedReadingUk3 from "@/assets/backgrounds/certificate-level-uk/Швидкочитання - 3.png";
+import SpeedReadingUk4 from "@/assets/backgrounds/certificate-level-uk/Швидкочитання - 4.png";
+import SpeedReadingUk5 from "@/assets/backgrounds/certificate-level-uk/Швидкочитання - 5.png";
+import SpeedReadingUk6 from "@/assets/backgrounds/certificate-level-uk/Швидкочитання - 6.png";
+import SpeedReadingUk from "@/assets/backgrounds/certificate-level-uk/Швидкочитання.png";
+import SpeedReadingSpeechTherapyUk1 from "@/assets/backgrounds/certificate-level-uk/Швидкочитання+Логопедія - 1.png";
+import SpeedReadingSpeechTherapyUk2 from "@/assets/backgrounds/certificate-level-uk/Швидкочитання+Логопедія - 2.png";
+// import SpeedReadingSpeechTherapyUk3 from "@/assets/backgrounds/certificate-level-uk/Швидкочитання+Логопедія - 3.png";
+import SpeedReadingSpeechTherapyUk4 from "@/assets/backgrounds/certificate-level-uk/Швидкочитання+Логопедія - 4.png";
+import SpeedReadingSpeechTherapyUk5 from "@/assets/backgrounds/certificate-level-uk/Швидкочитання+Логопедія - 5.png";
+import SpeedReadingSpeechTherapyUk6 from "@/assets/backgrounds/certificate-level-uk/Швидкочитання+Логопедія - 6.png";
+import SpeedReadingSpeechTherapyUk from "@/assets/backgrounds/certificate-level-uk/Швидкочитання+Логопедія.png";
+import itGeliosStartEn from "@/assets/backgrounds/certificate-level-en/IT Gelios Start.png";
 import SpeechTherapyEn from "@/assets/backgrounds/certificate-level-en/Логопедія.png";
-import MentalArithmeticEn from "@/assets/backgrounds/certificate-level-en/Ментальна арифметика.png";
 import MentalArithmeticEn1 from "@/assets/backgrounds/certificate-level-en/Ментальна арифметика - 1.png";
 import MentalArithmeticEn2 from "@/assets/backgrounds/certificate-level-en/Ментальна арифметика - 2.png";
 import MentalArithmeticEn3 from "@/assets/backgrounds/certificate-level-en/Ментальна арифметика - 3.png";
 import MentalArithmeticEn4 from "@/assets/backgrounds/certificate-level-en/Ментальна арифметика - 4.png";
-import MultiplicationandDivisionEn from "@/assets/backgrounds/certificate-level-en/Множення і ділення.png";
-import SpeedReadingEn from "@/assets/backgrounds/certificate-level-en/Швидкочитання.png";
+import MentalArithmeticEn from "@/assets/backgrounds/certificate-level-en/Ментальна арифметика.png";
 import SpeedReadingEn1 from "@/assets/backgrounds/certificate-level-en/Швидкочитання - 1.png";
 import SpeedReadingEn2 from "@/assets/backgrounds/certificate-level-en/Швидкочитання - 2.png";
 import SpeedReadingEn3 from "@/assets/backgrounds/certificate-level-en/Швидкочитання - 3.png";
 import SpeedReadingEn4 from "@/assets/backgrounds/certificate-level-en/Швидкочитання - 4.png";
 import SpeedReadingEn5 from "@/assets/backgrounds/certificate-level-en/Швидкочитання - 5.png";
 import SpeedReadingEn6 from "@/assets/backgrounds/certificate-level-en/Швидкочитання - 6.png";
+import SpeedReadingEn from "@/assets/backgrounds/certificate-level-en/Швидкочитання.png";
 import SpeedReadingSpeechTherapyEn1 from "@/assets/backgrounds/certificate-level-en/Швидкочитання+Логопедія - 1.png";
 import SpeedReadingSpeechTherapyEn2 from "@/assets/backgrounds/certificate-level-en/Швидкочитання+Логопедія - 2.png";
 import SpeedReadingSpeechTherapyEn3 from "@/assets/backgrounds/certificate-level-en/Швидкочитання+Логопедія - 3.png";
@@ -30,158 +48,129 @@ import SpeedReadingSpeechTherapyEn4 from "@/assets/backgrounds/certificate-level
 import SpeedReadingSpeechTherapyEn5 from "@/assets/backgrounds/certificate-level-en/Швидкочитання+Логопедія - 5.png";
 import SpeedReadingSpeechTherapyEn6 from "@/assets/backgrounds/certificate-level-en/Швидкочитання+Логопедія - 6.png";
 import SpeedReadingSpeechTherapyEn from "@/assets/backgrounds/certificate-level-en/Швидкочитання+Логопедія.png";
-import itGeliosStartUk from "@/assets/backgrounds/certificate-level-uk/IT Gelios Start.png";
-import SpeechTherapyUk from "@/assets/backgrounds/certificate-level-uk/Логопедія.png";
-import MentalArithmeticUk from "@/assets/backgrounds/certificate-level-uk/Ментальна арифметика.png";
-import MentalArithmeticUk1 from "@/assets/backgrounds/certificate-level-uk/Ментальна арифметика - 1.png";
-import MentalArithmeticUk2 from "@/assets/backgrounds/certificate-level-uk/Ментальна арифметика - 2.png";
-import MentalArithmeticUk3 from "@/assets/backgrounds/certificate-level-uk/Ментальна арифметика - 3.png";
-import MentalArithmeticUk4 from "@/assets/backgrounds/certificate-level-uk/Ментальна арифметика - 4.png";
-import MultiplicationandDivisionUkr from "@/assets/backgrounds/certificate-level-uk/Множення і ділення.png";
-import SpeedReadingUk from "@/assets/backgrounds/certificate-level-uk/Швидкочитання.png";
-import SpeedReadingUk1 from "@/assets/backgrounds/certificate-level-uk/Швидкочитання - 1.png";
-import SpeedReadingUk2 from "@/assets/backgrounds/certificate-level-uk/Швидкочитання - 2.png";
-import SpeedReadingUk3 from "@/assets/backgrounds/certificate-level-uk/Швидкочитання - 3.png";
-import SpeedReadingUk4 from "@/assets/backgrounds/certificate-level-uk/Швидкочитання - 4.png";
-import SpeedReadingUk5 from "@/assets/backgrounds/certificate-level-uk/Швидкочитання - 5.png";
-import SpeedReadingUk6 from "@/assets/backgrounds/certificate-level-uk/Швидкочитання - 6.png";
-import SpeedReadingSpeechTherapyUk1 from "@/assets/backgrounds/certificate-level-uk/Швидкочитання+Логопедія - 1.png";
-import SpeedReadingSpeechTherapyUk2 from "@/assets/backgrounds/certificate-level-uk/Швидкочитання+Логопедія - 2.png";
-import SpeedReadingSpeechTherapyUk4 from "@/assets/backgrounds/certificate-level-uk/Швидкочитання+Логопедія - 4.png";
-import SpeedReadingSpeechTherapyUk5 from "@/assets/backgrounds/certificate-level-uk/Швидкочитання+Логопедія - 5.png";
-import SpeedReadingSpeechTherapyUk6 from "@/assets/backgrounds/certificate-level-uk/Швидкочитання+Логопедія - 6.png";
-import SpeedReadingSpeechTherapyUk from "@/assets/backgrounds/certificate-level-uk/Швидкочитання+Логопедія.png";
 
-// --- Карта изображений для сопоставления ---
+const masterCertificateList = [
+  { id: 1, level_name: "Basic", image: "SpeechTherapyUk", category: 1, is_locked: true },
+  { id: 2, level_name: "Джуніор", image: "MentalArithmeticUk1", category: 2, is_locked: true },
+  { id: 3, level_name: "Базовий", image: "MentalArithmeticUk2", category: 2, is_locked: true },
+  { id: 4, level_name: "Основний", image: "MentalArithmeticUk3", category: 2, is_locked: true },
+  { id: 5, level_name: "Просунутий", image: "MentalArithmeticUk4", category: 2, is_locked: true },
+  { id: 6, level_name: "Повний курс", image: "MentalArithmeticUk", category: 2, is_locked: true },
+  { id: 7, level_name: "Повний курс", image: "MultiplicationandDivisionUkr", category: 3, is_locked: true },
+  { id: 8, level_name: "Повний курс", image: "SchooolPreparationEn", category: 4, is_locked: true },
+  { id: 9, level_name: "Джуніор", image: "SpeedReadingUk1", category: 5, is_locked: true },
+  { id: 10, level_name: "Базовий", image: "SpeedReadingUk2", category: 5, is_locked: true },
+  { id: 11, level_name: "Основний", image: "SpeedReadingUk3", category: 5, is_locked: true },
+  { id: 12, level_name: "Просунутий", image: "SpeedReadingUk4", category: 5, is_locked: true },
+  { id: 13, level_name: "Ерудит", image: "SpeedReadingUk5", category: 5, is_locked: true },
+  { id: 14, level_name: "Профі", image: "SpeedReadingUk6", category: 5, is_locked: true },
+  { id: 15, level_name: "Повний курс", image: "SpeedReadingUk", category: 5, is_locked: true },
+  { id: 16, level_name: "Джуніор", image: "SpeedReadingSpeechTherapyUk1", category: 6, is_locked: true },
+  { id: 17, level_name: "Базовий", image: "SpeedReadingSpeechTherapyUk2", category: 6, is_locked: true },
+  // { id: 18, level_name: "Основний", image: "SpeedReadingSpeechTherapyUk3", category: 6, is_locked: true },
+  { id: 19, level_name: "Просунутий", image: "SpeedReadsingSpeechTherapyUk4", category: 6, is_locked: true },
+  { id: 20, level_name: "Ерудит", image: "SpeedReadingSpeechTherapyUk5", category: 6, is_locked: true },
+  { id: 21, level_name: "Профі", image: "SpeedReadingSpeechTherapyUk6", category: 6, is_locked: true },
+  { id: 22, level_name: "Повний курс", image: "SpeedReadingSpeechTherapyUk", category: 6, is_locked: true },
+  { id: 23, level_name: "Повний курс", image: "itGeliosStartEn", category: 7, is_locked: true },
+  { id: 24, level_name: "Basic", image: "SpeechTherapyEn", category: 8, is_locked: true },
+  { id: 25, level_name: "Junior", image: "MentalArithmeticEn1", category: 9, is_locked: true },
+  { id: 26, level_name: "Basic", image: "MentalArithmeticEn2", category: 9, is_locked: true },
+  { id: 27, level_name: "Elementary", image: "MentalArithmeticEn3", category: 9, is_locked: true },
+  { id: 28, level_name: "Advanced", image: "MentalArithmeticEn4", category: 9, is_locked: true },
+  { id: 29, level_name: "Full Course", image: "MentalArithmeticEn", category: 9, is_locked: true },
+  { id: 30, level_name: "Basic", image: "MultiplicationandDivisionUkr", category: 10, is_locked: true },
+  { id: 31, level_name: "Basic", image: "SchooolPreparationEn", category: 11, is_locked: true },
+  { id: 32, level_name: "Junior", image: "SpeedReadingEn1", category: 12, is_locked: true },
+  { id: 33, level_name: "Basic", image: "SpeedReadingEn2", category: 12, is_locked: true },
+  { id: 34, level_name: "Elementary", image: "SpeedReadingEn3", category: 12, is_locked: true },
+  { id: 35, level_name: "Advanced", image: "SpeedReadingEn4", category: 12, is_locked: true },
+  { id: 36, level_name: "Erudite", image: "SpeedReadingEn5", category: 12, is_locked: true },
+  { id: 37, level_name: "Pro", image: "SpeedReadingEn6", category: 12, is_locked: true },
+  { id: 38, level_name: "Full Course", image: "SpeedReadingEn", category: 12, is_locked: true },
+  { id: 39, level_name: "Junior", image: "SpeedReadingSpeechTherapyEn1", category: 13, is_locked: true },
+  { id: 40, level_name: "Basic", image: "SpeedReadingSpeechTherapyEn2", category: 13, is_locked: true },
+  { id: 41, level_name: "Elementary", image: "SpeedReadingSpeechTherapyEn3", category: 13, is_locked: true },
+  { id: 42, level_name: "Advanced", image: "SpeedReadingSpeechTherapyEn4", category: 13, is_locked: true },
+  { id: 43, level_name: "Erudite", image: "SpeedReadingSpeechTherapyEn5", category: 13, is_locked: true },
+  { id: 44, level_name: "Pro", image: "SpeedReadingSpeechTherapyEn6", category: 13, is_locked: true },
+  { id: 45, level_name: "Full Course", image: "SpeedReadingSpeechTherapyEn", category: 13, is_locked: true },
+  { id: 46, level_name: "Basic", image: "itGeliosStartEn", category: 14, is_locked: true },
+];
+
 const imageMap: Record<string, string> = {
-  itGeliosStartEn, SchooolPreparationEn, SpeechTherapyEn, MentalArithmeticEn, MentalArithmeticEn1, MentalArithmeticEn2, MentalArithmeticEn3, MentalArithmeticEn4,
-  MultiplicationandDivisionEn, SpeedReadingEn, SpeedReadingEn1, SpeedReadingEn2, SpeedReadingEn3, SpeedReadingEn4, SpeedReadingEn5, SpeedReadingEn6,
-  SpeedReadingSpeechTherapyEn, SpeedReadingSpeechTherapyEn1, SpeedReadingSpeechTherapyEn2, SpeedReadingSpeechTherapyEn3, SpeedReadingSpeechTherapyEn4,
-  SpeedReadingSpeechTherapyEn5, SpeedReadingSpeechTherapyEn6, itGeliosStartUk, SpeechTherapyUk, MentalArithmeticUk, MentalArithmeticUk1, MentalArithmeticUk2,
-  MentalArithmeticUk3, MentalArithmeticUk4, MultiplicationandDivisionUkr, SpeedReadingUk, SpeedReadingUk1, SpeedReadingUk2, SpeedReadingUk3, SpeedReadingUk4,
-  SpeedReadingUk5, SpeedReadingUk6, SpeedReadingSpeechTherapyUk, SpeedReadingSpeechTherapyUk1, SpeedReadingSpeechTherapyUk2,
-  SpeedReadingSpeechTherapyUk4, SpeedReadingSpeechTherapyUk5, SpeedReadingSpeechTherapyUk6, SchooolPreparationEn
+  SpeechTherapyUk, MentalArithmeticUk1, MentalArithmeticUk2, MentalArithmeticUk3, MentalArithmeticUk4, MentalArithmeticUk, MultiplicationandDivisionUkr,
+  SchooolPreparationEn, SpeedReadingUk1, SpeedReadingUk2, SpeedReadingUk3, SpeedReadingUk4, SpeedReadingUk5, SpeedReadingUk6, SpeedReadingUk,
+  SpeedReadingSpeechTherapyUk1, SpeedReadingSpeechTherapyUk2, SpeedReadingSpeechTherapyUk4, SpeedReadingSpeechTherapyUk5,
+  SpeedReadingSpeechTherapyUk6, SpeedReadingSpeechTherapyUk, itGeliosStartEn, SpeechTherapyEn, MentalArithmeticEn1, MentalArithmeticEn2, MentalArithmeticEn3,
+  MentalArithmeticEn4, MentalArithmeticEn, SpeedReadingEn1, SpeedReadingEn2, SpeedReadingEn3, SpeedReadingEn4, SpeedReadingEn5, SpeedReadingEn6, SpeedReadingEn,
+  SpeedReadingSpeechTherapyEn1, SpeedReadingSpeechTherapyEn2, SpeedReadingSpeechTherapyEn3, SpeedReadingSpeechTherapyEn4, SpeedReadingSpeechTherapyEn5,
+  SpeedReadingSpeechTherapyEn6, SpeedReadingSpeechTherapyEn
 };
 
 const getCertificateImagePath = (imageNameFromBackend: string): string | undefined => {
-  if (!imageNameFromBackend) {
-    console.error(`[getCertificateImagePath] ОШИБКА: Имя изображения с бэкенда пустое или некорректное.`);
-    return undefined;
-  }
-
-  console.log(`[getCertificateImagePath] Запрос для ключа: "${imageNameFromBackend}"`);
-  const path = imageMap[imageNameFromBackend];
-  if (path) {
-    console.log(`[getCertificateImagePath] Найден путь для "${imageNameFromBackend}": ${path}`);
-  } else {
-    console.error(`[getCertificateImagePath] ОШИБКА: Изображение с ключом "${imageNameFromBackend}" НЕ НАЙДЕНО в imageMap.`);
-    console.log("[getCertificateImagePath] Доступные ключи в imageMap:", Object.keys(imageMap));
-  }
-  return path;
+  if (!imageNameFromBackend) return undefined;
+  return imageMap[imageNameFromBackend];
 };
-
 
 const certificatesStore = useCertificatesStore();
 const { getStudentCertificates: studentCertificates, loading, error } = storeToRefs(certificatesStore);
 
+const displayedCertificates = computed(() => {
+  const certs = [...masterCertificateList].sort((a,b) => a.id - b.id);
+  if (loading.value || error.value || !studentCertificates.value || studentCertificates.value.length === 0) {
+    return certs;
+  }
+  const earnedCertsMap = new Map();
+  studentCertificates.value.forEach(student => {
+    if (student.certificates && student.certificates.length > 0) {
+      student.certificates.forEach(cert => {
+        earnedCertsMap.set(cert.id, { ...cert, student_name: `${student.first_name} ${student.last_name}` });
+      });
+    }
+  });
+  return certs.map(masterCert => {
+    if (earnedCertsMap.has(masterCert.id)) {
+      const earnedCert = earnedCertsMap.get(masterCert.id);
+      return { ...masterCert, ...earnedCert, is_locked: false };
+    }
+    return masterCert;
+  });
+});
+
 onMounted(() => {
-  console.log('CertificateForm: Компонент смонтирован, запускаю fetchStudentCertificates.');
   certificatesStore.fetchStudentCertificates();
 });
 
-watch([studentCertificates, loading, error], ([newCertificates, newLoading, newError]) => {
-  console.log('CertificateForm: Состояние store изменилось.');
-  console.log('  studentCertificates (новое значение):', newCertificates);
-  console.log('  loading (новое значение):', newLoading);
-  console.log('  error (новое значение):', newError);
-
-  if (newLoading) {
-    console.log('CertificateForm: Текущее состояние - Загрузка.');
-  } else if (newError) {
-    console.log('CertificateForm: Текущее состояние - Ошибка:', newError);
-  } else if (!newCertificates || newCertificates.length === 0) {
-    console.log('CertificateForm: Загрузка завершена, нет ошибок, но studentCertificates пуст или не определен.');
-  } else if (newCertificates.length > 0) {
-    console.log('CertificateForm: Сертификаты загружены и готовы к отображению.');
-    newCertificates.forEach((studentData: any) => {
-      console.log(`CertificateForm: Обработка сертификатов для студента: ${studentData.first_name} ${studentData.last_name}`);
-      if (studentData.certificates && studentData.certificates.length > 0) {
-        studentData.certificates.forEach((cert: any) => {
-          console.log(`CertificateForm: -> Сертификат ID: ${cert.id}, image: "${cert.image}"`);
-          if (typeof cert.id !== 'number' || isNaN(cert.id)) {
-            console.error(`CertificateForm: КЛЮЧЕВАЯ ОШИБКА: certificate.id не является числом или NaN для сертификата:`, cert);
-          }
-
-          const imagePath = getCertificateImagePath(cert.image);
-          if (imagePath) {
-            console.log(`CertificateForm: Изображение для "${cert.image}" будет рендериться.`);
-          } else {
-            console.error(`CertificateForm: Изображение для "${cert.image}" НЕ БУДЕТ рендериться из-за отсутствия пути.`);
-          }
-        });
-      } else {
-        console.log(`CertificateForm: У студента ${studentData.first_name} ${studentData.last_name} нет сертификатов в массиве.`);
-      }
-    });
-  }
-}, { deep: true, immediate: true });
-
-// Функция для определения классов карточек
 const getCertificateCardClass = (certificate: any) => {
   const classes: string[] = [];
-  switch (certificate.level_name) {
-    case 'Джуніор':
-      classes.push('level-junior');
-      break;
-    case 'Базовий':
-      classes.push('level-basic');
-      break;
-    case 'Основний':
-      classes.push('level-main');
-      break;
-    case 'Просунутий':
-      classes.push('level-advanced');
-      break;
-    case 'Повний курс':
-      if (certificate.id === 5) { // ID для "IT Gelios Start"
-        classes.push('level-full-course');
-      } else {
-        classes.push('level-full-course-orange');
-      }
-      break;
-    case 'Прямий рахунок':
-      classes.push('level-direct-account');
-      break;
-    case 'Молоді друзі':
-      classes.push('level-young-friends');
-      break;
-    case 'Старші друзі':
-      classes.push('level-old-friends');
-      break;
-    case 'Комбінації':
-      classes.push('level-combinations');
-      break;
-    case 'Ерудит':
-      classes.push('level-erudit');
-      break;
-    case 'Профі':
-      classes.push('level-profi');
-      break;
-    default:
-      break;
-  }
-
   if (certificate.is_locked) {
     classes.push('locked');
+  }
+  switch (certificate.category) {
+    case 1: classes.push('level-profi'); break;
+    case 2: classes.push('level-main'); break;
+    case 3: classes.push('level-advanced'); break;
+    case 4: classes.push('level-profi'); break;
+    case 5: classes.push('level-erudit'); break;
+    case 6: classes.push('level-combinations'); break;
+    case 7: classes.push('level-full-course'); break;
+    case 8: classes.push('level-profi'); break;
+    case 9: classes.push('level-main'); break;
+    case 10: classes.push('level-advanced'); break;
+    case 11: classes.push('level-profi'); break;
+    case 12: classes.push('level-erudit'); break;
+    case 13: classes.push('level-combinations'); break;
+    case 14: classes.push('level-full-course'); break;
+    default: classes.push('level-basic'); break;
   }
   return classes;
 };
 
-// --- СОСТОЯНИЕ ДЛЯ МОДАЛЬНОГО ОКНА ---
 const showImageViewerModal = ref(false);
 const currentImageUrl = ref<string | null>(null);
-const currentCertificateData = ref<any>(null); // Передаем весь объект сертификата
-const currentStudentName = ref(''); // Имя студента
+const currentCertificateData = ref<any>(null);
+const currentStudentName = ref('');
 
 const openImageViewerModal = (imageUrl: string, certificate: any, studentName: string) => {
   currentImageUrl.value = imageUrl;
@@ -197,93 +186,56 @@ const closeImageViewerModal = () => {
   currentStudentName.value = '';
 };
 
-// --- Функция для показа изображения в модалке (БЕЗ ГЕНЕРАЦИИ PDF ЗДЕСЬ) ---
 const showCertificateImageInModal = async (certificate: any, studentName: string): Promise<void> => {
+  if (certificate.is_locked) return;
   const imagePath = getCertificateImagePath(certificate.image);
-  if (!imagePath) {
-    console.error(`Изображение для сертификата "${certificate.image}" не найдено.`);
-    return;
-  }
-
-  // Открываем модальное окно с URL изображения и передаем ПОЛНЫЕ ДАННЫЕ сертификата и имя студента
+  if (!imagePath) return;
   openImageViewerModal(imagePath, certificate, studentName);
 };
 
-// --- НОВАЯ ФУНКЦИЯ для обработки скачивания PDF напрямую ---
-// Мы не открываем модалку для скачивания, а вызываем метод напрямую на PdfViewerModal
-// Для этого нам нужно получить доступ к инстансу PdfViewerModal.
-// Проще всего передать данные для скачивания через пропсы и добавить специальный пропс
-// или отдельный метод в PdfViewerModal, который будет триггерить скачивание без открытия.
-// Для простоты, мы будем использовать ref на PdfViewerModal.
 const pdfViewerModalRef = ref<any>(null);
 
 const handleDownloadPdf = (certificate: any, studentName: string) => {
+  if (certificate.is_locked) return;
   const imagePath = getCertificateImagePath(certificate.image);
-  if (!imagePath) {
-    console.error(`Изображение для сертификата "${certificate.image}" не найдено для скачивания.`);
-    return;
-  }
-  // Вызываем метод downloadPdf напрямую на экземпляре модалки
-  // Это работает, потому что PdfViewerModal уже импортирует jspdf и шрифты
+  if (!imagePath) return;
   if (pdfViewerModalRef.value) {
-    // Временно устанавливаем данные, чтобы PdfViewerModal мог их использовать для генерации
     pdfViewerModalRef.value.setDownloadData(imagePath, certificate, studentName);
-    pdfViewerModalRef.value.triggerDownload(); // Вызываем метод для скачивания
-    pdfViewerModalRef.value.clearDownloadData(); // Очищаем данные после скачивания
+    pdfViewerModalRef.value.triggerDownload();
+    pdfViewerModalRef.value.clearDownloadData();
   }
 };
-
 </script>
 
 <template>
   <div class="certificate-form">
-<!--    <div class="certificate-header">-->
-<!--      <div class="dropdown">-->
-<!--        <label for="filter-certificates">Вибрати предмет</label>-->
-<!--        <select id="filter-certificates">-->
-<!--          <option value="all">Всі</option>-->
-<!--          <option value="completed">Завершено</option>-->
-<!--          <option value="in-progress">В процесі</option>-->
-<!--        </select>-->
-<!--        <span class="dropdown-arrow">-->
-<!--          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">-->
-<!--            <path d="M6 9L12 15L18 9" stroke="#5F6D7E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>-->
-<!--          </svg>-->
-<!--        </span>-->
-<!--      </div>-->
-<!--    </div>-->
-
     <div v-if="loading" class="loading-message">Загрузка сертификатов...</div>
     <div v-else-if="error" class="error-message">{{ error }}</div>
-    <div v-else-if="!studentCertificates || studentCertificates.length === 0" class="no-certificates-message">
-      Сертификаты не найдены.
-    </div>
     <div v-else class="certificates-grid">
-      <template v-for="(studentData, studentIndex) in studentCertificates" :key="studentData.first_name + studentData.last_name + studentIndex">
-        <div
-            v-for="(certificate, certIndex) in studentData.certificates"
-            :key="certificate.id !== undefined && certificate.id !== null && !isNaN(certificate.id) ? certificate.id : `${studentData.first_name}-${studentData.last_name}-cert-${certIndex}`"
-            class="certificate-card"
-            :class="getCertificateCardClass(certificate)">
-          <div class="certificate-image">
-            <img :src="getCertificateImagePath(certificate.image)" alt="Certificate Icon" v-if="getCertificateImagePath(certificate.image)">
-            <p v-else>Изображение не найдено</p>
-            <i v-if="certificate.is_locked" class="lock-icon material-icons">lock</i>
-          </div>
-          <div class="certificate-title">
-            {{ certificate.level_name }}
-          </div>
-
-          <div class="certificate-overlay">
-            <div class="overlay-icons">
-              <i class="fas fa-eye overlay-icon" @click.stop="showCertificateImageInModal(certificate, `${studentData.first_name} ${studentData.last_name}`)"></i>
-              <i class="fas fa-download overlay-icon" @click.stop="handleDownloadPdf(certificate, `${studentData.first_name} ${studentData.last_name}`)"></i>
-            </div>
+      <div
+          v-for="certificate in displayedCertificates"
+          :key="certificate.id"
+          class="certificate-card"
+          :class="getCertificateCardClass(certificate)">
+        <div class="certificate-image">
+          <img
+              v-if="getCertificateImagePath(certificate.image)"
+              :src="getCertificateImagePath(certificate.image)"
+              alt=""
+          >
+          <i v-if="certificate.is_locked" class="lock-icon fas fa-lock"></i>
+        </div>
+        <div class="certificate-title">
+          {{ certificate.level_name }}
+        </div>
+        <div v-if="!certificate.is_locked" class="certificate-overlay">
+          <div class="overlay-icons">
+            <i class="fas fa-eye overlay-icon" @click.stop="showCertificateImageInModal(certificate, certificate.student_name)"></i>
+            <i class="fas fa-download overlay-icon" @click.stop="handleDownloadPdf(certificate, certificate.student_name)"></i>
           </div>
         </div>
-      </template>
+      </div>
     </div>
-
     <ImageViewerModal
         ref="pdfViewerModalRef"
         :image-url="currentImageUrl"
@@ -299,74 +251,6 @@ const handleDownloadPdf = (certificate: any, studentName: string) => {
 .certificate-form {
   padding: 20px;
 }
-
-.certificate-header {
-  margin-bottom: 30px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  .dropdown {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background-color: #F0F0F0;
-    padding: 8px 15px;
-    border-radius: 12px;
-    position: relative;
-    cursor: pointer;
-
-    label {
-      font-weight: 500;
-      color: #5F6D7E;
-    }
-
-    select {
-      background: none;
-      border: none;
-      font-size: 16px;
-      font-family: 'Onest', sans-serif;
-      font-weight: 600;
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      appearance: none;
-      padding-right: 25px;
-      cursor: pointer;
-      outline: none;
-    }
-
-    .dropdown-arrow {
-      position: absolute;
-      right: 15px;
-      pointer-events: none;
-    }
-  }
-
-  .filter-button {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    font-weight: 500;
-    font-size: 14px;
-    transition: background-color 0.2s ease, color 0.2s ease;
-
-    &.active {
-      background-color: #0066FF;
-      color: white;
-    }
-
-    &:not(.active) {
-      background-color: #F0F0F0;
-      color: #5F6D7E;
-    }
-
-    &:hover:not(.active) {
-      background-color: #e0e0e0;
-    }
-  }
-}
-
 .certificates-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -374,100 +258,61 @@ const handleDownloadPdf = (certificate: any, studentName: string) => {
   padding-top: 20px;
 
   .certificate-card {
-    background-color: #F8F8FC;
     border-radius: 16px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
     padding: 10px;
     text-align: center;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.08);
-    cursor: pointer;
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
     height: 180px;
     position: relative;
     overflow: hidden;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease;
 
-    &:hover {
-      transform: translateY(-5px);
-      box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.12);
-      .certificate-overlay {
-        opacity: 1; // Show overlay on hover
+    &:not(.locked) {
+      cursor: pointer;
+      &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+        .certificate-overlay {
+          opacity: 1;
+        }
       }
     }
 
-    // --- Стили для фоновых цветов в зависимости от level_name ---
-    &.level-junior {
-      background-color: #FCE4EC;
-    }
-    &.level-basic {
-      background-color: #EDE7F6;
-    }
-    &.level-main {
-      background-color: #E3F2FD;
-    }
-    &.level-advanced {
-      background-color: #FFF3E0;
-    }
-    &.level-erudit {
-      background-color: #E0F2F7;
-    }
-    &.level-profi {
-      background-color: #F3E5F5;
-    }
-    &.level-full-course { // Фиолетовый "Повний курс"
-      background-color: #EDE7F6;
-    }
-    &.level-direct-account { // Прямий рахунок - оранжевый
-      background-color: #FFF3E0;
-    }
-    &.level-young-friends { // Молоді друзі - розовый
-      background-color: #FCE4EC;
-    }
-    &.level-old-friends { // Старші друзі - голубой
-      background-color: #E3F2FD;
-    }
-    &.level-combinations { // Комбінації - оранжевый
-      background-color: #FFF3E0;
-    }
-    &.level-full-course-orange { // Отдельный оранжевый "Повний курс"
-      background-color: #FFE0B2;
-    }
+    &.level-junior { background-color: #FCE4EC; }
+    &.level-basic { background-color: #EDE7F6; }
+    &.level-main { background-color: #E3F2FD; }
+    &.level-advanced { background-color: #FFF3E0; }
+    &.level-erudit { background-color: #E0F2F7; }
+    &.level-profi { background-color: #F3E5F5; }
+    &.level-full-course { background-color: #D1C4E9; }
+    &.level-combinations { background-color: #C5E1A5; }
 
-
-    // Стили для заблокированных карточек
     &.locked {
-      background-color: #CFD8DC;
-      opacity: 0.8;
       cursor: not-allowed;
-      .certificate-image {
+      background-color: #ECEFF1; // Чуть темнее фон для заблокированных
+
+      .certificate-image img {
         filter: grayscale(100%);
         opacity: 0.6;
       }
-      .lock-icon {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        color: #546E7A;
-        font-size: 3em;
-        z-index: 10;
-      }
-      // Оверлей не должен появляться на заблокированных
-      .certificate-overlay {
-        display: none; // Or opacity: 0 !important;
+      .certificate-title {
+        color: #78909C;
       }
     }
   }
 
   .certificate-image {
-    width: 100%;
-    height: 110px;
+    width: 125px;
+    height: 165px;
     display: flex;
     justify-content: center;
     align-items: center;
     margin-bottom: 5px;
+    position: relative; // Важно для позиционирования замка
 
     img {
       max-width: 90%;
@@ -475,9 +320,17 @@ const handleDownloadPdf = (certificate: any, studentName: string) => {
       object-fit: contain;
       border-radius: 8px;
     }
-    p {
-      font-size: 12px;
-      color: #999;
+
+    .lock-icon {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 3em;
+      z-index: 10;
+      pointer-events: none; // Иконка не перехватывает клики
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
     }
   }
 
@@ -486,60 +339,48 @@ const handleDownloadPdf = (certificate: any, studentName: string) => {
     font-size: 14px;
     color: #333;
     margin-top: auto;
-    margin-bottom: 0;
-    padding: 0 5px 10px;
+    padding: 0 5px 5px;
     text-align: center;
     line-height: 1.2;
   }
-
-  .certificate-date {
-    display: none;
-  }
 }
 
-// Стили для оверлея
 .certificate-overlay {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.6); // Semi-transparent black
+  background-color: rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;
   align-items: center;
-  opacity: 0; // Hidden by default
+  opacity: 0;
   transition: opacity 0.3s ease;
-  border-radius: 16px; // Match card border-radius
+  border-radius: 16px;
 
   .overlay-icons {
     display: flex;
-    gap: 20px; // Space between icons
-
+    gap: 20px;
     .overlay-icon {
       color: white;
-      font-size: 1.5em; // Larger icons
+      font-size: 1.5em;
       cursor: pointer;
       transition: transform 0.2s ease, color 0.2s ease;
-
       &:hover {
         transform: scale(1.1);
-        color: #0066FF; // Highlight on hover
+        color: #0066FF;
       }
     }
   }
 }
 
-
-.loading-message,
-.error-message,
-.no-certificates-message {
+.loading-message, .error-message {
   text-align: center;
   font-size: 18px;
   color: #5F6D7E;
   margin-top: 50px;
 }
-
 .error-message {
   color: #D32F2F;
 }
