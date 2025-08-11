@@ -15,6 +15,41 @@ export const useAuthStore = defineStore('auth', {
     }),
 
     actions: {
+        async refreshToken(): Promise<boolean> {
+            const refreshToken = localStorage.getItem('refreshToken');
+            if (!refreshToken) {
+                this.logout();
+                return false;
+            }
+
+            try {
+                const response = await axios.post(`${baseURL}/api/auth/refresh`, {
+                    refresh_token: refreshToken
+                });
+
+                const newAccessToken = response.data.access_token;
+                console.log(newAccessToken);
+                const newRefreshToken = response.data.refresh_token;
+
+                if (!newAccessToken) {
+                    console.log("refreshToken not found");
+                    this.logout();
+                    return false;
+                }
+
+                this.token = newAccessToken;
+                localStorage.setItem('token', newAccessToken);
+                if (newRefreshToken) {
+                    localStorage.setItem('refreshToken', newRefreshToken);
+                }
+                return true;
+
+            } catch (error) {
+                this.logout();
+                return false;
+            }
+        },
+
         async fetchProfile() {
             if (!this.token) {
                 return;
@@ -25,12 +60,41 @@ export const useAuthStore = defineStore('auth', {
                         Authorization: `Bearer ${this.token}`,
                     },
                 });
-                this.user = response.data; // Сохраняем данные пользователя из профиля
+                this.user = response.data;
                 this.isAuthenticated = true;
             } catch (error) {
-                console.error('Ошибка загрузки профиля:', error);
-                this.logout(); // Если токен невалидный, выходим из системы
+                throw error;
             }
+        },
+
+        async login({email, password}) {
+            try {
+                const response = await axios.post(`${baseURL}/api/auth/student/sign-in`, {
+                    email,
+                    password,
+                });
+                this.token = response.data.access_token;
+                if (this.token) {
+                    localStorage.setItem('token', this.token);
+                    localStorage.setItem('refreshToken', response.data.refresh_token)
+                    await this.fetchProfile();
+                }
+                this.error = null;
+                return {success: true};
+            } catch (error) {
+                // @ts-ignore
+                this.error = error.response?.data?.message || 'Ошибка входа';
+                return {success: false, error: this.error};
+            }
+        },
+
+        logout() {
+            this.isAuthenticated = false;
+            this.user = null;
+            this.token = null;
+            localStorage.removeItem('token');
+            localStorage.removeItem('refreshToken');
+            window.location.href = '/login';
         },
 
         async register({email, username, contactNumber, password}) {
@@ -45,7 +109,7 @@ export const useAuthStore = defineStore('auth', {
                 this.token = response.data.token;
                 if (this.token) {
                     localStorage.setItem('token', this.token);
-                    await this.fetchProfile(); // Загружаем полный профиль после регистрации
+                    await this.fetchProfile();
                 }
                 this.error = null;
                 return {success: true};
@@ -58,27 +122,6 @@ export const useAuthStore = defineStore('auth', {
                         type: "error"
                     });
                 }
-                return {success: false, error: this.error};
-            }
-        },
-
-        async login({email, password}) {
-            try {
-                const response = await axios.post(`${baseURL}/api/auth/student/sign-in`, {
-                    email,
-                    password,
-                });
-                this.token = response.data.access_token;
-                if (this.token) {
-                    localStorage.setItem('token', this.token);
-                    localStorage.setItem('refreshToken', response.data.refresh_token)
-                    await this.fetchProfile(); // Загружаем профиль после логина
-                }
-                this.error = null;
-                return {success: true};
-            } catch (error) {
-                // @ts-ignore
-                this.error = error.response?.data?.message || 'Ошибка входа';
                 return {success: false, error: this.error};
             }
         },
@@ -122,19 +165,11 @@ export const useAuthStore = defineStore('auth', {
             }
         },
 
-        logout() {
-            this.isAuthenticated = false;
-            this.user = null;
-            this.token = null;
-            localStorage.removeItem('token');
-            localStorage.removeItem('refreshToken');
-        },
-
         initializeAuth() {
             const token = localStorage.getItem('token');
             if (token) {
                 this.token = token;
-                this.fetchProfile(); // При инициализации приложения загружаем профиль, если есть токен
+                this.fetchProfile();
             }
         },
     },
