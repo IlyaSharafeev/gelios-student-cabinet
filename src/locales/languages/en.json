@@ -204,5 +204,17 @@
   "dashboard.balance": "balance",
   "tabs.classes": "Classes",
   "tabs.homeworks": "Homework",
-  "tabs.materials": "Materials"
+  "tabs.materials": "Materials",
+  "materials.sort.new": "New",
+  "materials.sort.old": "Old",
+  "materials.refresh_title": "Refresh",
+  "materials.directions.reading": "Reading",
+  "materials.directions.english": "English",
+  "materials.directions.logic": "Logic",
+  "materials.add_tag": "+ Tag",
+  "materials.tags.homework": "homework",
+  "materials.tags.test": "test",
+  "materials.download_title": "Download",
+  "materials.pagination.next_title": "Next",
+  "materials.mock_item_title": "A Very Smart Book on Speed Reading"
 }

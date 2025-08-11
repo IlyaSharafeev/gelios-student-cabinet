@@ -205,5 +205,17 @@
   "dashboard.balance": "баланс",
   "tabs.classes": "Заняття",
   "tabs.homeworks": "Домашня робота",
-  "tabs.materials": "Матеріали"
+  "tabs.materials": "Матеріали",
+  "materials.sort.new": "Нові",
+  "materials.sort.old": "Старі",
+  "materials.refresh_title": "Оновити",
+  "materials.directions.reading": "Читання",
+  "materials.directions.english": "Англійська",
+  "materials.directions.logic": "Логіка",
+  "materials.add_tag": "+ Тег",
+  "materials.tags.homework": "домашка",
+  "materials.tags.test": "тест",
+  "materials.download_title": "Завантажити",
+  "materials.pagination.next_title": "Вперед",
+  "materials.mock_item_title": "Дуже розумна книга зі Швидкочитання"
 }

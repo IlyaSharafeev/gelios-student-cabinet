@@ -204,5 +204,17 @@
   "dashboard.balance": "баланс",
   "tabs.classes": "Занятия",
   "tabs.homeworks": "Домашняя работа",
-  "tabs.materials": "Материалы"
+  "tabs.materials": "Материалы",
+  "materials.sort.new": "Новые",
+  "materials.sort.old": "Старые",
+  "materials.refresh_title": "Обновить",
+  "materials.directions.reading": "Чтение",
+  "materials.directions.english": "Английский",
+  "materials.directions.logic": "Логика",
+  "materials.add_tag": "+ Тег",
+  "materials.tags.homework": "домашка",
+  "materials.tags.test": "тест",
+  "materials.download_title": "Скачать",
+  "materials.pagination.next_title": "Вперед",
+  "materials.mock_item_title": "Очень умная книга по Скорочтению"
 }

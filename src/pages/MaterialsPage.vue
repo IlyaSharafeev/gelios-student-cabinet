@@ -2,17 +2,17 @@
   <div class="materials">
     <div class="materials__topbar">
       <div class="materials__sort">
-        <div class="materials__dropdown" @keydown.escape="openSort=false">
+        <div ref="sortDropdown" class="materials__dropdown" @keydown.escape="openSort=false">
           <button class="materials__btn-sort" @click="openSort=!openSort" :aria-expanded="openSort">
             <span class="materials__btn-sort-text">{{ sortLabel }}</span>
             <svg viewBox="0 0 24 24" class="materials__icon"><path d="M7 10l5 5 5-5"/></svg>
           </button>
           <div v-if="openSort" class="materials__menu">
-            <button class="materials__menu-item" :class="{'materials__menu-item--active': sort==='desc'}" @click="setSort('desc')">Нові</button>
-            <button class="materials__menu-item" :class="{'materials__menu-item--active': sort==='asc'}"  @click="setSort('asc')">Старі</button>
+            <button class="materials__menu-item" :class="{'materials__menu-item--active': sort==='desc'}" @click="setSort('desc')">{{ $t('materials.sort.new') }}</button>
+            <button class="materials__menu-item" :class="{'materials__menu-item--active': sort==='asc'}"  @click="setSort('asc')">{{ $t('materials.sort.old') }}</button>
           </div>
         </div>
-        <button class="materials__btn-refresh" title="Оновити" @click="refresh">
+        <button class="materials__btn-refresh" :title="$t('materials.refresh_title')" @click="refresh">
           <svg viewBox="0 0 24 24" class="materials__icon">
             <path d="M4 12a8 8 0 018-8 8 8 0 017.45 5h-2.2A6 6 0 006 12a6 6 0 0010.24 4.24l1.42 1.42A8 8 0 014 12z"/>
             <path d="M20 4v6h-6"/>
@@ -21,13 +21,13 @@
       </div>
 
       <div class="materials__filters">
-        <div class="materials__dropdown" @keydown.escape="openDir=false">
+        <div ref="dirDropdown" class="materials__dropdown" @keydown.escape="openDir=false">
           <button class="materials__btn-select" @click="openDir=!openDir" :aria-expanded="openDir">
             <span class="materials__btn-select-text">{{ directionLabel }}</span>
             <svg viewBox="0 0 24 24" class="materials__icon"><path d="M7 10l5 5 5-5"/></svg>
           </button>
           <div v-if="openDir" class="materials__menu">
-            <button class="materials__menu-item" :class="{'materials__menu-item--active': !direction}" @click="setDirection(null)">Усі напрямки</button>
+            <button class="materials__menu-item" :class="{'materials__menu-item--active': !direction}" @click="setDirection(null)">{{ $t('homework.directions.all') }}</button>
             <button v-for="d in directions" :key="d" class="materials__menu-item" :class="{'materials__menu-item--active': direction===d}" @click="setDirection(d)">
               {{ d }}
             </button>
@@ -41,8 +41,8 @@
             <svg viewBox="0 0 24 24" class="materials__icon materials__icon--close"><path d="M6 6l12 12M18 6L6 18"/></svg>
           </button>
 
-          <div class="materials__dropdown" @keydown.escape="openTags=false">
-            <button class="materials__chip materials__chip--add" @click="openTags=!openTags">+ Тег</button>
+          <div ref="tagsDropdown" class="materials__dropdown" @keydown.escape="openTags=false">
+            <button class="materials__chip materials__chip--add" @click="openTags=!openTags">{{ $t('materials.add_tag') }}</button>
             <div v-if="openTags" class="materials__menu materials__menu--tags">
               <button v-for="t in allTags" :key="t" class="materials__menu-item"
                       :class="{'materials__menu-item--active': selectedTags.includes(t)}"
@@ -85,7 +85,7 @@
             </span>
             <span class="materials__title-text">{{ it.title }}</span>
           </div>
-          <button class="materials__cell materials__cell--action" :style="{ color: it.color.fg }" title="Завантажити" @click="download(it)">
+          <button class="materials__cell materials__cell--action" :style="{ color: it.color.fg }" :title="$t('materials.download_title')" @click="download(it)">
             <svg viewBox="0 0 24 24" class="materials__icon"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
           </button>
         </li>
@@ -99,7 +99,7 @@
             </span>
             <span class="materials__title-text">{{ it.title }}</span>
           </div>
-          <button class="materials__cell materials__cell--action" :style="{ color: it.color.fg }" title="Завантажити" @click="download(it)">
+          <button class="materials__cell materials__cell--action" :style="{ color: it.color.fg }" :title="$t('materials.download_title')" @click="download(it)">
             <svg viewBox="0 0 24 24" class="materials__icon"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
           </button>
         </li>
@@ -107,7 +107,7 @@
     </div>
 
     <div class="materials__pagination">
-      <button class="materials__nav materials__nav--prev" :disabled="page===1" @click="page--" title="Назад">
+      <button class="materials__nav materials__nav--prev" :disabled="page===1" @click="page--" :title="$t('login.recovery.back')">
         <svg viewBox="0 0 24 24" class="materials__icon"><path d="M15 18l-6-6 6-6"/></svg>
       </button>
 
@@ -121,7 +121,7 @@
         </button>
       </div>
 
-      <button class="materials__nav materials__nav--next" :disabled="page===totalPages" @click="page++" title="Вперед">
+      <button class="materials__nav materials__nav--next" :disabled="page===totalPages" @click="page++" :title="$t('materials.pagination.next_title')">
         <svg viewBox="0 0 24 24" class="materials__icon"><path d="M9 6l6 6-6 6"/></svg>
       </button>
     </div>
@@ -129,7 +129,15 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, onBeforeUnmount, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+
+// Template refs for dropdowns
+const sortDropdown = ref<HTMLElement | null>(null)
+const dirDropdown = ref<HTMLElement | null>(null)
+const tagsDropdown = ref<HTMLElement | null>(null)
 
 type Color = { bg: string; fg: string }
 type Item = { id: string; title: string; createdAt: string; direction: string; tags: string[]; url: string; color: Color }
@@ -144,20 +152,25 @@ const palette: Color[] = [
   { bg: '#EEF2FF', fg: '#6366F1' },
 ]
 
-const directions = ['Математика', 'Читання', 'Англійська', 'Логіка']
-const allTags = ['щц', 'ма', 'A1', 'B2', 'домашка', 'тест']
+const directions = computed(() => [
+  t('homework.directions.mathematics'),
+  t('materials.directions.reading'),
+  t('materials.directions.english'),
+  t('materials.directions.logic'),
+])
+const allTags = computed(() => ['щц', 'ма', 'A1', 'B2', t('materials.tags.homework'), t('materials.tags.test')])
 
 const items = ref<Item[]>([])
 const loading = ref(false)
 
 const sort = ref<'asc' | 'desc'>('desc')
 const openSort = ref(false)
-const sortLabel = computed(() => (sort.value === 'desc' ? 'Нові' : 'Старі'))
+const sortLabel = computed(() => (sort.value === 'desc' ? t('materials.sort.new') : t('materials.sort.old')))
 const setSort = (s: 'asc' | 'desc') => { sort.value = s; openSort.value = false; page.value = 1 }
 
 const direction = ref<string | null>(null)
 const openDir = ref(false)
-const directionLabel = computed(() => direction.value ?? 'Напрямок')
+const directionLabel = computed(() => direction.value ?? t('homework.table.direction'))
 const setDirection = (d: string | null) => { direction.value = d; openDir.value = false; page.value = 1 }
 
 const selectedTags = ref<string[]>([])
@@ -240,12 +253,12 @@ async function fetchItems(force = false){
   await new Promise(r => setTimeout(r, 650))
   const count = 9322 + (force ? Math.floor(Math.random()*6-3) : 0)
   items.value = Array.from({length: count}).map((_,i) => {
-    const dir = pick(directions)
-    const tgs = [pick(allTags)]
-    if (Math.random() > .5) tgs.push(pick(allTags))
+    const dir = pick(directions.value)
+    const tgs = [pick(allTags.value)]
+    if (Math.random() > .5) tgs.push(pick(allTags.value))
     return {
       id: `m_${i}_${Math.random().toString(36).slice(2,7)}`,
-      title: 'Очень умная книга по Швидкочитанню',
+      title: t('materials.mock_item_title'),
       createdAt: randomDate(),
       direction: dir,
       tags: Array.from(new Set(tgs)),
@@ -256,7 +269,26 @@ async function fetchItems(force = false){
   loading.value = false
 }
 
-onMounted(fetchItems)
+const handleClickOutside = (event: MouseEvent) => {
+  if (sortDropdown.value && !sortDropdown.value.contains(event.target as Node)) {
+    openSort.value = false
+  }
+  if (dirDropdown.value && !dirDropdown.value.contains(event.target as Node)) {
+    openDir.value = false
+  }
+  if (tagsDropdown.value && !tagsDropdown.value.contains(event.target as Node)) {
+    openTags.value = false
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('mousedown', handleClickOutside)
+  fetchItems()
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('mousedown', handleClickOutside)
+})
 </script>
 
 <style scoped lang="scss">
