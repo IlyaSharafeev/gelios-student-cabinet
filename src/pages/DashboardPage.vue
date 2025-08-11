@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import {ref, onMounted, computed} from 'vue'; // Import onMounted and computed
+import {ref, onMounted, computed} from 'vue';
 import {useI18n} from "vue-i18n";
-import AOS from 'aos'; // Import AOS
-import 'aos/dist/aos.css'; // Import AOS CSS
-import {useAuthStore} from "@/stores/auth"; // Импортируем хранилище
+import AOS from 'aos';
+import 'aos/dist/aos.css';
+import {useAuthStore} from "@/stores/auth";
 
 interface Statistic {
   title: string;
@@ -52,45 +52,56 @@ const homeworks: Homework[] = [
   {studentName: "Азарко А.Б.", trainerName: "Кіберкiшка", date: "3 Жовтня 12:30", isOverdue: false}
 ];
 
-const courses: Course[] = [
-  {
-    title: "Швидкочитання",
-    teacher: "Засядько I.О.",
-    progress: "12",
-    total: "48",
-    isLocked: false,
-    progressColor: 'green'
-  },
-  {title: "Математика", teacher: "Стефак М.С.", progress: "7", total: "24", isLocked: false, progressColor: 'green'},
-  {title: "Ментальна арифметика", teacher: "", progress: "", total: "", isLocked: true, progressColor: ''},
-  {title: "Українська мова", teacher: "", progress: "", total: "", isLocked: true, progressColor: ''},
-  {
-    title: "Українська мова",
-    teacher: "Засядько I.О.",
-    progress: "1",
-    total: "48",
-    isLocked: false,
-    progressColor: 'red'
-  },
-  {
-    title: "Історія України",
-    teacher: "Петренко О.П.",
-    progress: "5",
-    total: "10",
-    isLocked: false,
-    progressColor: 'green'
-  },
-  {title: "Фізика", teacher: "", progress: "", total: "", isLocked: true, progressColor: ''},
-  {title: "Хімія", teacher: "Сидоренко В.В.", progress: "8", total: "15", isLocked: false, progressColor: 'green'},
-];
-
 const authStore = useAuthStore();
 const {t} = useI18n();
 
-// Вычисляемые свойства для имени и монет ученика
-// Предполагается, что объект user содержит поля `firstName` и `coins`
 const studentName = computed(() => authStore.user?.first_name || '...');
 const studentCoins = computed(() => authStore.user?.coins || 0);
+
+const courses = computed((): Course[] => {
+  const activeCourses = authStore.user?.active_courses?.map((course: any): Course => {
+    const totalLessons = course.lessons_base + course.lessons_extra;
+    const progressPercentage = totalLessons > 0 ? course.lessons_completed / totalLessons : 0;
+
+    const teacherName = course.teacher_last_name && course.teacher_first_name && course.teacher_patronymic
+        ? `${course.teacher_last_name} ${course.teacher_first_name.charAt(0)}.${course.teacher_patronymic.charAt(0)}.`
+        : 'Не назначен';
+
+    return {
+      title: course.direction.name_uk,
+      teacher: teacherName,
+      progress: String(course.lessons_completed),
+      total: String(totalLessons),
+      isLocked: false,
+      progressColor: progressPercentage < 0.25 ? 'red' : 'green',
+    };
+  }) || [];
+
+  const allPossibleCourseTitles = [
+    "Швидкочитання",
+    "Математика",
+    "Ментальна Арифметика",
+    "Українська мова",
+    "Історія України",
+    "Фізика",
+    "Хімія"
+  ];
+
+  const activeCourseTitles = new Set(activeCourses.map(c => c.title));
+
+  const lockedCourses: Course[] = allPossibleCourseTitles
+      .filter(title => !activeCourseTitles.has(title))
+      .map(title => ({
+        title: title,
+        teacher: "",
+        progress: "",
+        total: "",
+        isLocked: true,
+        progressColor: ''
+      }));
+
+  return [...activeCourses, ...lockedCourses];
+});
 
 const coursesContainer = ref<HTMLElement | null>(null);
 
@@ -114,16 +125,14 @@ const scrollDown = () => {
   }
 };
 
-// Initialize AOS and fetch profile when the component is mounted
 onMounted(() => {
   if (!authStore.user) {
     authStore.fetchProfile();
   }
 
   AOS.init({
-    // Optional: Add your AOS configuration here
-    duration: 800, // values from 0 to 3000, with step 50ms
-    once: false, // whether animation should happen only once - while scrolling down
+    duration: 800,
+    once: false,
   });
 });
 </script>
