@@ -1,11 +1,8 @@
 import { defineStore } from 'pinia';
-import axios from 'axios';
+import api from '@/api/api.ts';
 import { useNotification } from "@kyvg/vue3-notification";
-import { useAuthStore } from './auth';
 
 const { notify } = useNotification();
-
-const baseURL = 'https://gelios-teacher.ddns.net/api';
 
 export interface CertificateLanguage {
     id: string;
@@ -63,41 +60,13 @@ export const useCertificatesStore = defineStore('certificates', {
         async fetchStudentCertificates() {
             this.loading = true;
             this.error = null;
-            const authStore = useAuthStore();
-
-            if (!authStore.token) {
-                const refreshed = await authStore.refreshToken();
-                if (!refreshed) {
-                    this.loading = false;
-                    return;
-                }
-            }
-
             try {
-                const response = await axios.get<StudentCertificatesData>(`${baseURL}/student/certificates`, {
-                    headers: { 'Authorization': `Bearer ${authStore.token}` }
-                });
+                const response = await api.get<StudentCertificatesData>('/api/student/certificates');
                 this.studentCertificates = response.data;
             } catch (error: any) {
-                if (error.response?.status === 401) {
-                    const refreshed = await authStore.refreshToken();
-                    if (refreshed) {
-                        try {
-                            const response = await axios.get<StudentCertificatesData>(`${baseURL}/student/certificates`, {
-                                headers: { 'Authorization': `Bearer ${authStore.token}` }
-                            });
-                            this.studentCertificates = response.data;
-                        } catch (retryError: any) {
-                            const errorMessage = retryError.response?.data?.message || 'Ошибка после обновления токена';
-                            this.error = errorMessage;
-                            notify({ title: errorMessage, type: "error" });
-                        }
-                    }
-                } else {
-                    const errorMessage = error.response?.data?.message || 'Ошибка при загрузке сертификатов';
-                    this.error = errorMessage;
-                    notify({ title: errorMessage, type: "error" });
-                }
+                const errorMessage = error.response?.data?.message || 'Ошибка при загрузке сертификатов студента';
+                this.error = errorMessage;
+                notify({ title: errorMessage, type: "error" });
             } finally {
                 this.loading = false;
             }
@@ -106,41 +75,13 @@ export const useCertificatesStore = defineStore('certificates', {
         async fetchCertificateLanguages() {
             this.loading = true;
             this.error = null;
-            const authStore = useAuthStore();
-
-            if (!authStore.token) {
-                const refreshed = await authStore.refreshToken();
-                if (!refreshed) {
-                    this.loading = false;
-                    return;
-                }
-            }
-
             try {
-                const response = await axios.get<CertificateLanguage[]>(`${baseURL}/get-language-directions`, {
-                    headers: { 'Authorization': `Bearer ${authStore.token}` }
-                });
+                const response = await api.get<CertificateLanguage[]>('/api/get-language-directions');
                 this.languages = response.data;
             } catch (error: any) {
-                if (error.response?.status === 401) {
-                    const refreshed = await authStore.refreshToken();
-                    if (refreshed) {
-                        try {
-                            const response = await axios.get<CertificateLanguage[]>(`${baseURL}/get-language-directions`, {
-                                headers: { 'Authorization': `Bearer ${authStore.token}` }
-                            });
-                            this.languages = response.data;
-                        } catch (retryError: any) {
-                            const errorMessage = retryError.response?.data?.message || 'Ошибка при загрузке языков';
-                            this.error = errorMessage;
-                            notify({ title: errorMessage, type: "error" });
-                        }
-                    }
-                } else {
-                    const errorMessage = error.response?.data?.message || 'Ошибка при загрузке языков';
-                    this.error = errorMessage;
-                    notify({ title: errorMessage, type: "error" });
-                }
+                const errorMessage = error.response?.data?.message || 'Ошибка при загрузке языков сертификатов';
+                this.error = errorMessage;
+                notify({ title: errorMessage, type: "error" });
             } finally {
                 this.loading = false;
             }
@@ -149,40 +90,13 @@ export const useCertificatesStore = defineStore('certificates', {
         async fetchCertificateDirections() {
             this.loading = true;
             this.error = null;
-            const authStore = useAuthStore();
-            if (!authStore.token) {
-                const refreshed = await authStore.refreshToken();
-                if (!refreshed) {
-                    this.loading = false;
-                    return;
-                }
-            }
-
             try {
-                const response = await axios.get<CertificateDirectionsResponse>(`${baseURL}/get-certificate-directions`, {
-                    headers: { 'Authorization': `Bearer ${authStore.token}` }
-                });
+                const response = await api.get<CertificateDirectionsResponse>('/api/get-certificate-directions');
                 this.directions = response.data;
             } catch (error: any) {
-                if (error.response?.status === 401) {
-                    const refreshed = await authStore.refreshToken();
-                    if (refreshed) {
-                        try {
-                            const response = await axios.get<CertificateDirectionsResponse>(`${baseURL}/get-certificate-directions`, {
-                                headers: { 'Authorization': `Bearer ${authStore.token}` }
-                            });
-                            this.directions = response.data;
-                        } catch (retryError: any) {
-                            const errorMessage = retryError.response?.data?.message || 'Ошибка при загрузке направлений';
-                            this.error = errorMessage;
-                            notify({ title: errorMessage, type: "error" });
-                        }
-                    }
-                } else {
-                    const errorMessage = error.response?.data?.message || 'Ошибка при загрузке направлений';
-                    this.error = errorMessage;
-                    notify({ title: errorMessage, type: "error" });
-                }
+                const errorMessage = error.response?.data?.message || 'Ошибка при загрузке направлений сертификатов';
+                this.error = errorMessage;
+                notify({ title: errorMessage, type: "error" });
             } finally {
                 this.loading = false;
             }
@@ -191,40 +105,13 @@ export const useCertificatesStore = defineStore('certificates', {
         async fetchStudents() {
             this.loading = true;
             this.error = null;
-            const authStore = useAuthStore();
-            if (!authStore.token) {
-                const refreshed = await authStore.refreshToken();
-                if (!refreshed) {
-                    this.loading = false;
-                    return;
-                }
-            }
-
             try {
-                const response = await axios.get<Student[]>(`${baseURL}/get-students`, {
-                    headers: { 'Authorization': `Bearer ${authStore.token}` }
-                });
+                const response = await api.get<Student[]>('/api/get-students');
                 this.students = response.data;
             } catch (error: any) {
-                if (error.response?.status === 401) {
-                    const refreshed = await authStore.refreshToken();
-                    if (refreshed) {
-                        try {
-                            const response = await axios.get<Student[]>(`${baseURL}/get-students`, {
-                                headers: { 'Authorization': `Bearer ${authStore.token}` }
-                            });
-                            this.students = response.data;
-                        } catch (retryError: any) {
-                            const errorMessage = retryError.response?.data?.message || 'Ошибка при загрузке студентов';
-                            this.error = errorMessage;
-                            notify({ title: errorMessage, type: "error" });
-                        }
-                    }
-                } else {
-                    const errorMessage = error.response?.data?.message || 'Ошибка при загрузке студентов';
-                    this.error = errorMessage;
-                    notify({ title: errorMessage, type: "error" });
-                }
+                const errorMessage = error.response?.data?.message || 'Ошибка при загрузке студентов';
+                this.error = errorMessage;
+                notify({ title: errorMessage, type: "error" });
             } finally {
                 this.loading = false;
             }
@@ -233,41 +120,11 @@ export const useCertificatesStore = defineStore('certificates', {
         async assignCertificates(payload: { directionId: number; levelIds: number[]; languageCode: string; studentIds: number[] }) {
             this.loading = true;
             this.error = null;
-            const authStore = useAuthStore();
-            if (!authStore.token) {
-                const refreshed = await authStore.refreshToken();
-                if (!refreshed) {
-                    this.loading = false;
-                    throw new Error("Сессия истекла");
-                }
-            }
-
             try {
-                const response = await axios.post(`${baseURL}/assign-certificate`, payload, {
-                    headers: { 'Authorization': `Bearer ${authStore.token}` }
-                });
+                const response = await api.post('/api/assign-certificate', payload);
                 notify({ title: 'Сертификаты успешно присвоены!', type: "success" });
                 return response.data;
             } catch (error: any) {
-                if (error.response?.status === 401) {
-                    const refreshed = await authStore.refreshToken();
-                    if (refreshed) {
-                        try {
-                            const response = await axios.post(`${baseURL}/assign-certificate`, payload, {
-                                headers: { 'Authorization': `Bearer ${authStore.token}` }
-                            });
-                            notify({ title: 'Сертификаты успешно присвоены!', type: "success" });
-                            return response.data;
-                        } catch (retryError: any) {
-                            const errorMessage = retryError.response?.data?.message || 'Ошибка при присвоении сертификатов';
-                            this.error = errorMessage;
-                            notify({ title: errorMessage, type: "error" });
-                            throw retryError;
-                        }
-                    } else {
-                        throw new Error("Сессия истекла");
-                    }
-                }
                 const errorMessage = error.response?.data?.message || 'Ошибка при присвоении сертификатов';
                 this.error = errorMessage;
                 notify({ title: errorMessage, type: "error" });

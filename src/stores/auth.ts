@@ -1,5 +1,6 @@
 import {defineStore} from 'pinia';
 import axios from 'axios';
+import api from '@/api/api.ts';
 import {useNotification} from "@kyvg/vue3-notification";
 
 const {notify} = useNotification()
@@ -9,9 +10,9 @@ const baseURL = import.meta.env.VITE_API_BASE_URL;
 export const useAuthStore = defineStore('auth', {
     state: () => ({
         isAuthenticated: false,
-        user: null,
+        user: null as any | null,
         token: localStorage.getItem('token') || null,
-        error: null,
+        error: null as string | null,
     }),
 
     actions: {
@@ -28,11 +29,9 @@ export const useAuthStore = defineStore('auth', {
                 });
 
                 const newAccessToken = response.data.access_token;
-                console.log(newAccessToken);
                 const newRefreshToken = response.data.refresh_token;
 
                 if (!newAccessToken) {
-                    console.log("refreshToken not found");
                     this.logout();
                     return false;
                 }
@@ -55,19 +54,15 @@ export const useAuthStore = defineStore('auth', {
                 return;
             }
             try {
-                const response = await axios.get(`${baseURL}/api/student/profile`, {
-                    headers: {
-                        Authorization: `Bearer ${this.token}`,
-                    },
-                });
+                const response = await api.get('/api/student/profile');
                 this.user = response.data;
                 this.isAuthenticated = true;
             } catch (error) {
-                throw error;
+                // Ошибка будет обработана в перехватчике api.ts
             }
         },
 
-        async login({email, password}) {
+        async login({email, password}: any) {
             try {
                 const response = await axios.post(`${baseURL}/api/auth/student/sign-in`, {
                     email,
@@ -81,8 +76,7 @@ export const useAuthStore = defineStore('auth', {
                 }
                 this.error = null;
                 return {success: true};
-            } catch (error) {
-                // @ts-ignore
+            } catch (error: any) {
                 this.error = error.response?.data?.message || 'Ошибка входа';
                 return {success: false, error: this.error};
             }
@@ -97,7 +91,7 @@ export const useAuthStore = defineStore('auth', {
             window.location.href = '/login';
         },
 
-        async register({email, username, contactNumber, password}) {
+        async register({email, username, contactNumber, password}: any) {
             try {
                 const response = await axios.post(`${baseURL}/api/auth/student/register`, {
                     email,
@@ -113,8 +107,7 @@ export const useAuthStore = defineStore('auth', {
                 }
                 this.error = null;
                 return {success: true};
-            } catch (error) {
-                // @ts-ignore
+            } catch (error: any) {
                 this.error = error.response?.data?.message || 'Ошибка регистрации';
                 if (this.error !== null) {
                     notify({
@@ -126,13 +119,12 @@ export const useAuthStore = defineStore('auth', {
             }
         },
 
-        async recoverPassword(email) {
+        async recoverPassword(email: string) {
             try {
                 await axios.post(`${baseURL}/api/auth/forgot-password`, {email});
                 this.error = null;
                 return {success: true};
-            } catch (error) {
-                // @ts-ignore
+            } catch (error: any) {
                 this.error = error.response?.data?.message || 'Ошибка восстановления пароля';
                 if (this.error !== null) {
                     notify({
@@ -144,7 +136,7 @@ export const useAuthStore = defineStore('auth', {
             }
         },
 
-        async resetPassword({token, password}) {
+        async resetPassword({token, password}: any) {
             try {
                 await axios.post(`${baseURL}/api/auth/reset-password`, {
                     token,
@@ -152,8 +144,7 @@ export const useAuthStore = defineStore('auth', {
                 });
                 this.error = null;
                 return {success: true};
-            } catch (error) {
-                // @ts-ignore
+            } catch (error: any) {
                 this.error = error.response?.data?.message || 'Ошибка восстановления пароля'
                 if (this.error !== null) {
                     notify({
