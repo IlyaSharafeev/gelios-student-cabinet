@@ -32,13 +32,13 @@ const handleLogout = () => {
             :class="{ active: activeTab === 'progress' }"
             @click="setActiveTab('progress')"
         >
-          {{ t('progress') }}
+          {{ t('account.tabs.progress') }}
         </button>
         <button
             :class="{ active: activeTab === 'certificate' }"
             @click="setActiveTab('certificate')"
         >
-          {{ t('certificate') }}
+          {{ t('account.tabs.certificate') }}
         </button>
       </div>
     </div>
@@ -67,7 +67,6 @@ const handleLogout = () => {
     width: fit-content;
     background-color: #FFFFFF;
     border-radius: 16px;
-    padding: 8px; /* Added padding for tab buttons */
   }
 
   .logout-button {

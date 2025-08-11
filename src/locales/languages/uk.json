@@ -217,5 +217,7 @@
   "materials.tags.test": "тест",
   "materials.download_title": "Завантажити",
   "materials.pagination.next_title": "Вперед",
-  "materials.mock_item_title": "Дуже розумна книга зі Швидкочитання"
+  "materials.mock_item_title": "Дуже розумна книга зі Швидкочитання",
+  "account.tabs.progress": "Прогрес",
+  "account.tabs.certificate": "Сертифікат"
 }

@@ -216,5 +216,7 @@
   "materials.tags.test": "тест",
   "materials.download_title": "Скачать",
   "materials.pagination.next_title": "Вперед",
-  "materials.mock_item_title": "Очень умная книга по Скорочтению"
+  "materials.mock_item_title": "Очень умная книга по Скорочтению",
+  "account.tabs.progress": "Прогресс",
+  "account.tabs.certificate": "Сертификат"
 }
