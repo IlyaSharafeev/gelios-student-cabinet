@@ -24,12 +24,13 @@ interface HomeWorksSettings {
  */
 export interface ApiHomework {
     id: number;
-    trainerId: number; // ID для связи с тренажером
-    deadline: string; // Крайний срок выполнения (ISO-строка)
+    trainerId: number;
+    deadline: string;
+    startDate: string;
     homeWorksSettings: HomeWorksSettings;
-    status: 'pending' | 'in-progress' | 'completed' | 'overdue'; // Статус задания
-    statusDate: string; // Дата последнего изменения статуса (ISO-строка)
-    createDate: string; // Дата создания (ISO-строка)
+    status: 'pending' | 'in-progress' | 'completed' | 'overdue';
+    statusDate: string;
+    createDate: string;
 }
 
 export const useHomeworksStore = defineStore('homeworks', {
@@ -51,30 +52,6 @@ export const useHomeworksStore = defineStore('homeworks', {
                 this.homeworks = response.data;
             } catch (error: any) {
                 const errorMessage = error.response?.data?.message || 'Ошибка при загрузке домашних заданий';
-                this.error = errorMessage;
-                notify({ title: errorMessage, type: "error" });
-            } finally {
-                this.loading = false;
-            }
-        },
-
-        /**
-         * Отправляет запрос на принятие домашнего задания.
-         * @param {number} homeworkId - ID домашнего задания для принятия.
-         */
-        async acceptHomework(homeworkId: number) {
-            this.loading = true;
-            try {
-                // ПРИМЕЧАНИЕ: Здесь должен быть реальный эндпоинт для принятия задания, например:
-                // await api.post(`/api/students/homeworks/${homeworkId}/accept`);
-
-                console.log(`Принятие задания с ID: ${homeworkId}. (Имитация API вызова)`);
-                notify({ title: 'Домашнее задание принято!', type: "success" });
-
-                // После успешного принятия обновляем список, чтобы получить актуальный статус и дедлайн.
-                await this.fetchHomeworks();
-            } catch (error: any) {
-                const errorMessage = error.response?.data?.message || 'Не удалось принять задание';
                 this.error = errorMessage;
                 notify({ title: errorMessage, type: "error" });
             } finally {
