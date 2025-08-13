@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { useI18n } from 'vue-i18n'; // Import useI18n
+import { useI18n } from 'vue-i18n';
+import { useHomeworksStore, ApiHomework } from '@/stores/homeworks.ts'; // Импортируем новый store
 
 // Import all trainer images
 import trainer1 from '@/assets/backgrounds/trainers/1.png';
@@ -21,10 +22,10 @@ import trainer14 from '@/assets/backgrounds/trainers/14.png';
 import trainer15 from '@/assets/backgrounds/trainers/15.png';
 import trainer16 from '@/assets/backgrounds/trainers/16.png';
 
+// Интерфейс для данных, которые использует компонент
 interface Homework {
   id: number;
-  titleKey: string; // Use translation key instead of hardcoded title
-  initialType: 'accept' | 'perform';
+  titleKey: string;
   currentType: 'accept' | 'perform';
   createdAt: string;
   dueDate: string;
@@ -35,7 +36,8 @@ interface Homework {
 }
 
 const router = useRouter();
-const { t, locale } = useI18n(); // Initialize i18n
+const { t, locale } = useI18n();
+const homeworksStore = useHomeworksStore(); // Инициализируем store
 
 // Utility function to slugify text
 const slugify = (text: string): string => {
@@ -56,13 +58,12 @@ const pluralize = (key: string, count: number): string => {
     return absCount === 1 ? forms[0] : forms[1] || forms[0];
   }
 
-  // Logic for Ukrainian and Russian
   const cases = [2, 0, 1, 1, 1, 2];
   const formIndex = (absCount % 100 > 4 && absCount % 100 < 20) ? 2 : cases[(absCount % 10 < 5) ? absCount % 10 : 5];
   return forms[formIndex] || forms[0];
 };
 
-// Hardcoded list of all trainers aligned with i18n keys
+// Список тренажеров для сопоставления ID с API и данных для отображения
 const trainers = [
   { id: 1, key: 'add_homework.trainers.find_pair', image: trainer1 },
   { id: 2, key: 'add_homework.trainers.speed_reading_technique', image: trainer2 },
@@ -83,95 +84,49 @@ const trainers = [
 ].map(trainer => ({
   ...trainer,
   name: t(trainer.key),
-  slug: slugify(t(trainer.key, 'uk')), // Use Ukrainian for consistent slugs
+  slug: slugify(t(trainer.key, 'uk')),
 }));
 
-
-// Helper to get trainer image and slug by key
-const getTrainerInfo = (key: string) => {
-  const trainer = trainers.find(t => t.key === key);
+// Helper для поиска информации о тренажере по ID из API
+const getTrainerInfoById = (trainerId: number) => {
+  const trainer = trainers.find(t => t.id === trainerId);
+  if (trainer) {
+    return {
+      titleKey: trainer.key,
+      iconImage: trainer.image,
+      trainerSlug: trainer.slug,
+    };
+  }
+  // Запасной вариант для неизвестного ID
   return {
-    iconImage: trainer ? trainer.image : '',
-    trainerSlug: trainer ? trainer.slug : slugify(t(key, 'uk')), // Fallback slugify
+    titleKey: 'add_homework.trainers.unknown_trainer', // Рекомендую добавить этот ключ в ваши файлы локализации
+    iconImage: '', // или путь к изображению по умолчанию
+    trainerSlug: 'unknown-trainer',
   };
 };
 
-const now = new Date();
+// Computed property для преобразования данных из store в формат для шаблона
+const homeworks = computed<Homework[]>(() => {
+  return homeworksStore.getHomeworks.map((apiHw: ApiHomework) => {
+    const trainerInfo = getTrainerInfoById(apiHw.trainerId);
 
-const homeworks = ref<Homework[]>([
-  {
-    id: 1,
-    titleKey: 'add_homework.trainers.find_cybercat',
-    initialType: 'accept',
-    currentType: 'accept',
-    createdAt: new Date(now.getTime() - 3 * 60 * 60 * 1000).toISOString(),
-    dueDate: new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString(),
-    rewards: 32,
-    ...getTrainerInfo('add_homework.trainers.find_cybercat'),
-  },
-  {
-    id: 2,
-    titleKey: 'add_homework.trainers.speed_reading_technique',
-    initialType: 'accept',
-    currentType: 'accept',
-    createdAt: new Date(now.getTime() - 5 * 60 * 60 * 1000).toISOString(),
-    dueDate: new Date(now.getTime() + 12 * 60 * 60 * 1000).toISOString(),
-    rewards: 32,
-    ...getTrainerInfo('add_homework.trainers.speed_reading_technique'),
-  },
-  {
-    id: 3,
-    titleKey: 'add_homework.trainers.schulte_table',
-    initialType: 'accept',
-    currentType: 'accept',
-    createdAt: new Date(now.getTime() - 1 * 60 * 60 * 1000).toISOString(),
-    dueDate: new Date(now.getTime() + 48 * 60 * 60 * 1000).toISOString(),
-    rewards: 32,
-    ...getTrainerInfo('add_homework.trainers.schulte_table'),
-  },
-  {
-    id: 4,
-    titleKey: 'add_homework.trainers.spritz',
-    initialType: 'accept',
-    currentType: 'accept',
-    createdAt: new Date(now.getTime() - 2 * 60 * 60 * 1000).toISOString(),
-    dueDate: new Date(now.getTime() + 6 * 60 * 60 * 1000).toISOString(),
-    rewards: 32,
-    ...getTrainerInfo('add_homework.trainers.spritz'),
-  },
-  {
-    id: 5,
-    titleKey: 'add_homework.trainers.mental_arithmetic',
-    initialType: 'accept',
-    currentType: 'accept',
-    createdAt: new Date(now.getTime() - 10 * 60 * 1000).toISOString(),
-    dueDate: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString(),
-    rewards: 32,
-    ...getTrainerInfo('add_homework.trainers.mental_arithmetic'),
-  },
-  {
-    id: 6,
-    titleKey: 'add_homework.trainers.fillwords',
-    initialType: 'accept',
-    currentType: 'accept',
-    createdAt: new Date(now.getTime() - 30 * 60 * 1000).toISOString(),
-    dueDate: new Date(now.getTime() + 1 * 60 * 60 * 1000).toISOString(),
-    rewards: 32,
-    ...getTrainerInfo('add_homework.trainers.fillwords'),
-  },
-  // ... (add other homeworks similarly) ...
-  {
-    id: 16,
-    titleKey: 'add_homework.trainers.speed_reading_technique',
-    initialType: 'accept',
-    currentType: 'perform',
-    createdAt: new Date(now.getTime() - 10 * 60 * 60 * 1000).toISOString(),
-    dueDate: new Date(now.getTime() - 1 * 60 * 60 * 1000).toISOString(),
-    acceptedAt: new Date(now.getTime() - 8 * 60 * 60 * 1000).toISOString(),
-    rewards: 32,
-    ...getTrainerInfo('add_homework.trainers.speed_reading_technique'),
-  },
-]);
+    // Сопоставляем статус из API с типом кнопки в компоненте
+    const currentType = (apiHw.status === 'pending') ? 'accept' : 'perform';
+    const acceptedAt = (apiHw.status !== 'pending') ? apiHw.statusDate : undefined;
+
+    return {
+      id: apiHw.id,
+      titleKey: trainerInfo.titleKey,
+      currentType: currentType,
+      createdAt: apiHw.createDate,
+      dueDate: apiHw.deadline,
+      acceptedAt: acceptedAt,
+      rewards: 32, // API не возвращает награды, используем значение по умолчанию
+      iconImage: trainerInfo.iconImage,
+      trainerSlug: trainerInfo.trainerSlug,
+    };
+  });
+});
 
 const formatTimeRemaining = (ms: number): string => {
   const absoluteMs = Math.abs(ms);
@@ -194,7 +149,6 @@ const formatTimeRemaining = (ms: number): string => {
   return ms < 0 ? `${t('homework.overdue_by')} ${result}` : result;
 };
 
-
 const calculateTimeRemaining = (isoDueDateString: string) => {
   const now = new Date();
   const dueDate = new Date(isoDueDateString);
@@ -210,13 +164,11 @@ const updateTimers = () => {
   });
 };
 
+// Обработчик нажатия на кнопку (принять/выполнить)
 const handleHomeworkAction = (homework: Homework) => {
   if (homework.currentType === 'accept') {
-    const acceptanceTime = new Date();
-    homework.acceptedAt = acceptanceTime.toISOString();
-    homework.dueDate = new Date(acceptanceTime.getTime() + 24 * 60 * 60 * 1000).toISOString();
-    homework.currentType = 'perform';
-    updateTimers();
+    // Вызываем действие из store для принятия задания
+    homeworksStore.acceptHomework(homework.id);
   } else if (homework.currentType === 'perform') {
     if (homework.trainerSlug) {
       router.push({ name: 'game-view', params: { trainerSlug: homework.trainerSlug } });
@@ -227,7 +179,8 @@ const handleHomeworkAction = (homework: Homework) => {
 };
 
 onMounted(() => {
-  updateTimers();
+  homeworksStore.fetchHomeworks(); // Загружаем данные при монтировании компонента
+  updateTimers(); // Первый запуск таймеров
   interval = setInterval(updateTimers, 1000);
 });
 
@@ -235,67 +188,58 @@ onUnmounted(() => {
   clearInterval(interval);
 });
 
-// Computed property to determine time bar width
+// Логика для progress bar остается без изменений, т.к. `homeworks` теперь
+// является computed property с необходимой структурой.
 const getTimeBarWidth = (homework: Homework) => {
   const nowMs = new Date().getTime();
   const dueDateMs = new Date(homework.dueDate).getTime();
 
   if (homework.currentType === 'perform') {
-    return '100%';
+    const acceptedAtMs = new Date(homework.acceptedAt || homework.createdAt).getTime();
+    const totalDuration = dueDateMs - acceptedAtMs;
+    if (totalDuration <= 0) return '100%';
+    const elapsedTime = nowMs - acceptedAtMs;
+    const progressPercentage = Math.max(0, Math.min(100, (elapsedTime / totalDuration) * 100));
+    return `${progressPercentage}%`;
   }
 
   const timeLeft = dueDateMs - nowMs;
+  if (timeLeft < 0) return '100%';
 
-  if (timeLeft < 0) {
-    return '100%';
-  }
+  const createdAtMs = new Date(homework.createdAt).getTime();
+  const totalDuration = dueDateMs - createdAtMs;
+  if (totalDuration <= 0) return '100%';
 
-  let totalDuration: number;
-  let elapsedTime: number;
-
-  if (homework.currentType === 'perform' && homework.acceptedAt) {
-    const acceptedAtMs = new Date(homework.acceptedAt).getTime();
-    totalDuration = 24 * 60 * 60 * 1000;
-    elapsedTime = nowMs - acceptedAtMs;
-  } else {
-    const createdAtMs = new Date(homework.createdAt).getTime();
-    totalDuration = dueDateMs - createdAtMs;
-    elapsedTime = nowMs - createdAtMs;
-  }
-
-  if (totalDuration <= 0) {
-    return '100%';
-  }
-
+  const elapsedTime = nowMs - createdAtMs;
   const progressPercentage = Math.max(0, Math.min(100, (elapsedTime / totalDuration) * 100));
-
   return `${progressPercentage}%`;
 };
 
-// Computed property to determine time bar color
 const getTimeBarColorClass = (homework: Homework) => {
   const timeLeft = calculateTimeRemaining(homework.dueDate);
-
+  // В режиме 'perform', если время истекло, полоса должна быть красной
   if (homework.currentType === 'perform') {
-    return 'red-text-and-bar';
-  } else {
-    return timeLeft < 0 ? 'red-text-and-bar' : 'blue-text-and-bar';
+    return timeLeft < 0 ? 'red-text-and-bar' : 'blue-text-and-bar'; // Можно поменять на другой цвет для perform
   }
+  return timeLeft < 0 ? 'red-text-and-bar' : 'blue-text-and-bar';
 };
+
 </script>
 
 <template>
   <div class="homeworks-page">
-    <div class="homework-list">
+    <div v-if="homeworksStore.isLoading" class="loading-indicator">Загрузка...</div>
+    <div v-else-if="homeworksStore.error" class="error-indicator">{{ homeworksStore.error }}</div>
+    <div v-else class="homework-list">
       <div v-for="homework in homeworks" :key="homework.id" class="homework-item">
         <div class="homework-icon">
-          <img :src="homework.iconImage" :alt="t(homework.titleKey)" class="icon-image" />
+          <img v-if="homework.iconImage" :src="homework.iconImage" :alt="t(homework.titleKey)" class="icon-image" />
         </div>
         <div class="homework-details">
           <div class="homework-grid">
             <div class="homework-title">{{ t(homework.titleKey) }}</div>
             <div class="homework-time">
-              <div class="homework-time-title">{{ homework.acceptedAt ? $t('homework.time_to_perform') : $t('homework.time_to_accept') }}</div>
+              <div class="homework-time-title">{{ homework.currentType === 'perform' ? $t('homework.time_to_perform') : $t('homework.time_to_accept') }}</div>
               <div class="homework-time-title-progress-bar-wrapper">
                 <div class="time-value" :class="getTimeBarColorClass(homework)">{{ timers[homework.id] }}</div>
                 <div
@@ -330,7 +274,7 @@ const getTimeBarColorClass = (homework: Homework) => {
 </template>
 
 <style scoped lang="scss">
-// Styles remain the same as in the original file
+// Styles remain the same
 .homeworks-page {
   padding: 20px;
   min-height: 100vh;
