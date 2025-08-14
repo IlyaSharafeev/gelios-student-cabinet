@@ -5,23 +5,6 @@ import AOS from 'aos';
 import 'aos/dist/aos.css';
 import {useAuthStore} from "@/stores/auth";
 
-interface Statistic {
-  title: string;
-  description_key: string;
-}
-
-interface UpcomingClass {
-  name: string;
-  date: string;
-}
-
-interface Homework {
-  studentName: string;
-  trainerName: string;
-  date: string;
-  isOverdue: boolean;
-}
-
 interface Course {
   title: string;
   teacher: string;
@@ -31,27 +14,6 @@ interface Course {
   progressColor: string;
 }
 
-const statistics: Statistic[] = [
-  {title: "74", description_key: "students_count"},
-  {title: "315", description_key: "homework_count"},
-  {title: "213", description_key: "lessons_count"}
-];
-
-const upcomingClasses: UpcomingClass[] = [
-  {name: "Засядько I.О.", date: "12.01 10:00"},
-  {name: "Азарко А.Б.", date: "12.01 11:30"},
-  {name: "Кличко I.У.", date: "12.01 14:00"},
-  {name: "Засядько I.О.", date: "12.01 14:00"},
-  {name: "Азарко А.Б.", date: "12.01 14:00"},
-  {name: "Азарко А.Б.", date: "12.01 14:00"},
-];
-
-const homeworks: Homework[] = [
-  {studentName: "Засядько I.О.", trainerName: "Кіберкiшка", date: "30 Вересня 12:30", isOverdue: true},
-  {studentName: "Кличко I.У.", trainerName: "Знайди слово", date: "1 Жовтня 14:30", isOverdue: false},
-  {studentName: "Азарко А.Б.", trainerName: "Кіберкiшка", date: "3 Жовтня 12:30", isOverdue: false}
-];
-
 const authStore = useAuthStore();
 const {t} = useI18n();
 
@@ -59,6 +21,7 @@ const studentName = computed(() => authStore.user?.first_name || '...');
 const studentCoins = computed(() => authStore.user?.coins || 0);
 
 const courses = computed((): Course[] => {
+  // Обрабатываем активные курсы из authStore.user.active_courses
   const activeCourses = authStore.user?.active_courses?.map((course: any): Course => {
     const totalLessons = course.lessons_base + course.lessons_extra;
     const progressPercentage = totalLessons > 0 ? course.lessons_completed / totalLessons : 0;
@@ -77,31 +40,20 @@ const courses = computed((): Course[] => {
     };
   }) || [];
 
-  const allPossibleCourseTitles = [
-    "Швидкочитання",
-    "Математика",
-    "Ментальна Арифметика",
-    "Українська мова",
-    "Історія України",
-    "Фізика",
-    "Хімія"
-  ];
+  // Обрабатываем неактивные (заблокированные) курсы из authStore.user.inactive_courses
+  const lockedCourses: Course[] = authStore.user?.inactive_courses?.map((course: any): Course => ({
+    title: course.name_uk,
+    teacher: "",
+    progress: "",
+    total: "",
+    isLocked: true,
+    progressColor: ''
+  })) || [];
 
-  const activeCourseTitles = new Set(activeCourses.map(c => c.title));
-
-  const lockedCourses: Course[] = allPossibleCourseTitles
-      .filter(title => !activeCourseTitles.has(title))
-      .map(title => ({
-        title: title,
-        teacher: "",
-        progress: "",
-        total: "",
-        isLocked: true,
-        progressColor: ''
-      }));
-
+  // Объединяем оба массива для отображения
   return [...activeCourses, ...lockedCourses];
 });
+
 
 const coursesContainer = ref<HTMLElement | null>(null);
 
@@ -306,6 +258,7 @@ onMounted(() => {
   max-height: calc(100vh - 150px);
   padding-right: 50px;
   box-sizing: border-box;
+  padding-bottom: 130px;
 
   &::-webkit-scrollbar {
     width: 0;
