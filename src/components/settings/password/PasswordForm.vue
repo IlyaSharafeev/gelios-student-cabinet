@@ -12,42 +12,55 @@ const { notify } = useNotification();
 const authStore = useAuthStore();
 const router = useRouter();
 
-const changePasswordForm = ref({
-  oldPassword: "",
+const resetPasswordForm = ref({
   newPassword: "",
   confirmNewPassword: "",
 });
 
-const changePasswordRules = computed(() => ({
-  oldPassword: {
-    required,
-    minLength: minLength(6)
-  },
+const resetPasswordRules = computed(() => ({
   newPassword: {
     required,
     minLength: minLength(6)
   },
   confirmNewPassword: {
     required,
-    sameAs: sameAs(changePasswordForm.value.newPassword)
+    sameAs: sameAs(resetPasswordForm.value.newPassword)
   },
 }));
 
-const vChangePassword = useVuelidate(changePasswordRules, changePasswordForm);
+const vResetPassword = useVuelidate(resetPasswordRules, resetPasswordForm);
 
 const errorMessage = ref<string | null>(null);
 
-const onChangePasswordSubmit = async () => {
-  const isValid = await vChangePassword.value.$validate();
+const onResetPasswordSubmit = async () => {
+  const isValid = await vResetPassword.value.$validate();
   if (isValid) {
-    const { success, error } = await authStore.changePassword(changePasswordForm.value);
+    // ИЗМЕНЕНИЕ: Токен теперь берется из auth store
+    const token = authStore.token;
+
+    if (!token) {
+      errorMessage.value = "Токен аутентификации не найден.";
+      notify({
+        title: "Ошибка",
+        text: "Вы должны быть авторизованы, чтобы выполнить это действие.",
+        type: "error",
+      });
+      return;
+    }
+
+    // Вызываем действие resetPassword с токеном из хранилища
+    const { success, error } = await authStore.resetPassword({
+      token: token,
+      password: resetPasswordForm.value.newPassword,
+    });
+
     if (success) {
       notify({
         title: t("change_password.notifications.success.title"),
         text: t("change_password.notifications.success.text"),
         type: "success",
       });
-      router.push("/dashboard");
+      router.push("/login");
     } else {
       errorMessage.value = error || t("change_password.notifications.error.text");
       notify({
@@ -67,20 +80,9 @@ const onChangePasswordSubmit = async () => {
 };
 
 // Computed validation errors for each field
-const oldPasswordErrors = computed(() => {
-  if (vChangePassword.value.oldPassword.$dirty && vChangePassword.value.oldPassword.$errors.length) {
-    return vChangePassword.value.oldPassword.$errors.map(error => {
-      if (error.$validator === 'required') return t('change_password.validation.password');
-      if (error.$validator === 'minLength') return t('change_password.validation.password');
-      return '';
-    });
-  }
-  return [];
-});
-
 const newPasswordErrors = computed(() => {
-  if (vChangePassword.value.newPassword.$dirty && vChangePassword.value.newPassword.$errors.length) {
-    return vChangePassword.value.newPassword.$errors.map(error => {
+  if (vResetPassword.value.newPassword.$dirty && vResetPassword.value.newPassword.$errors.length) {
+    return vResetPassword.value.newPassword.$errors.map(error => {
       if (error.$validator === 'required') return t('change_password.validation.password');
       if (error.$validator === 'minLength') return t('change_password.validation.password');
       return '';
@@ -90,8 +92,8 @@ const newPasswordErrors = computed(() => {
 });
 
 const confirmNewPasswordErrors = computed(() => {
-  if (vChangePassword.value.confirmNewPassword.$dirty && vChangePassword.value.confirmNewPassword.$errors.length) {
-    return vChangePassword.value.confirmNewPassword.$errors.map(error => {
+  if (vResetPassword.value.confirmNewPassword.$dirty && vResetPassword.value.confirmNewPassword.$errors.length) {
+    return vResetPassword.value.confirmNewPassword.$errors.map(error => {
       if (error.$validator === 'required') return t('change_password.validation.confirm_password');
       if (error.$validator === 'sameAs') return t('change_password.validation.confirm_password');
       return '';
@@ -107,22 +109,6 @@ const confirmNewPasswordErrors = computed(() => {
       <h2 class="title">{{ t("change_password.form.title") }}</h2>
       <div class="error-message" v-if="errorMessage">{{ errorMessage }}</div>
       <div class="form">
-        <div class="form-old-password">
-          <div class="label">{{ t("change_password.form.old_password.label") }}</div>
-          <div class="field-old-password">
-            <input
-                class="input"
-                :class="{ 'input-error': oldPasswordErrors.length }"
-                type="password"
-                :placeholder="t('change_password.form.old_password.placeholder')"
-                v-model="changePasswordForm.oldPassword"
-                @blur="vChangePassword.oldPassword.$touch"
-            />
-            <div class="error-message" v-if="oldPasswordErrors.length">
-              {{ oldPasswordErrors[0] }}
-            </div>
-          </div>
-        </div>
         <div class="form-new-password">
           <div class="label">{{ t("change_password.form.new_password.label") }}</div>
           <div class="field-new-password">
@@ -131,8 +117,8 @@ const confirmNewPasswordErrors = computed(() => {
                 :class="{ 'input-error': newPasswordErrors.length }"
                 type="password"
                 :placeholder="t('change_password.form.new_password.placeholder')"
-                v-model="changePasswordForm.newPassword"
-                @blur="vChangePassword.newPassword.$touch"
+                v-model="resetPasswordForm.newPassword"
+                @blur="vResetPassword.newPassword.$touch"
             />
             <div class="error-message" v-if="newPasswordErrors.length">
               {{ newPasswordErrors[0] }}
@@ -147,8 +133,8 @@ const confirmNewPasswordErrors = computed(() => {
                 :class="{ 'input-error': confirmNewPasswordErrors.length }"
                 type="password"
                 :placeholder="t('change_password.form.confirm_new_password.placeholder')"
-                v-model="changePasswordForm.confirmNewPassword"
-                @blur="vChangePassword.confirmNewPassword.$touch"
+                v-model="resetPasswordForm.confirmNewPassword"
+                @blur="vResetPassword.confirmNewPassword.$touch"
             />
             <div class="error-message" v-if="confirmNewPasswordErrors.length">
               {{ confirmNewPasswordErrors[0] }}
@@ -156,7 +142,7 @@ const confirmNewPasswordErrors = computed(() => {
           </div>
         </div>
       </div>
-      <div class="button change-password-button" @click="onChangePasswordSubmit">{{ t("change_password.form.submit") }}</div>
+      <div class="button change-password-button" @click="onResetPasswordSubmit">{{ t("change_password.form.submit") }}</div>
     </div>
 
     <notifications />
