@@ -1,8 +1,10 @@
 import { defineStore } from 'pinia';
 import api from '@/api/api.ts';
 import { useNotification } from "@kyvg/vue3-notification";
+import { useAuthStore} from "@/stores/auth.ts";
 
 const { notify } = useNotification();
+const authStore = useAuthStore();
 
 /**
  * @interface HomeWorksSettings
@@ -104,6 +106,7 @@ export const useHomeworksStore = defineStore('homeworks', {
                     title: "Награда успешно получена!",
                     type: "success"
                 });
+                await authStore.fetchProfile();
             } catch (error: any) {
                 const errorMessage = error.response?.data?.message || 'Ошибка при получении награды';
                 notify({ title: errorMessage, type: "error" });
