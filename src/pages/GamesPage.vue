@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useHomeworksStore } from '@/stores/homeworks';
 
+// ... імпорти картинок ...
 import trainer1 from '@/assets/backgrounds/trainers/1.png';
 import trainer2 from '@/assets/backgrounds/trainers/2.png';
 import trainer3 from '@/assets/backgrounds/trainers/3.png';
@@ -79,7 +80,6 @@ const configuredIframeUrl = computed(() => {
   return selectedTrainer.value.iframeUrl;
 });
 
-
 const selectTrainer = (trainer: Trainer) => {
   router.push({ name: 'game-view', params: { trainerSlug: trainer.slug } });
 };
@@ -92,6 +92,33 @@ const handleIframeLoad = () => {
   isLoadingIframe.value = false;
 };
 
+// ✅ ОНОВЛЕНО: Виправлена логіка перевірки
+const handleGameEvent = async (event: MessageEvent) => {
+  const data = event.data;
+
+  // Крок 1: Відфільтровуємо події, залишаючи тільки потрібну
+  if (typeof data !== 'object' || data === null || data.type !== 'gamePlayed' || !data.payload) {
+    return;
+  }
+
+  // Крок 2: Перевіряємо умову перемоги всередині 'payload'
+  if (data.payload.isWin === true) {
+    const activeId = homeworksStore.getActiveHomeworkId;
+
+    // Крок 3: Перевіряємо, чи є активне ДЗ
+    if (activeId) {
+      console.log(`Homework ${activeId} is done! Sending request...`);
+      try {
+        await homeworksStore.markHomeworkAsDone(activeId);
+        await router.push('/homework');
+      } catch (error) {
+        console.error("Error while marking homework as done:", error);
+      }
+    }
+  }
+};
+
+
 watch(
     () => route.params.trainerSlug,
     (newSlug) => {
@@ -102,19 +129,24 @@ watch(
     { immediate: true }
 );
 
-// ✅ Єдиний watch для синхронізації store з роутом
 watch(
     () => route.query.homeworkId,
     (newId) => {
-      // Перетворюємо ID з рядка в число, або в null, якщо його немає
       const homeworkId = newId ? parseInt(newId as string, 10) : null;
       homeworksStore.setActiveHomework(homeworkId);
     },
     {
-      // immediate: true гарантує, що логіка спрацює при першому завантаженні компонента
       immediate: true,
     }
 );
+
+onMounted(() => {
+  window.addEventListener('message', handleGameEvent);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('message', handleGameEvent);
+});
 </script>
 
 <template>
@@ -176,21 +208,19 @@ watch(
 
 .games-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Adjusted minmax to be slightly smaller to allow more cards per row on wider screens, and allow fitting on smaller screens */
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 20px;
 }
 
-/* Adjustments for smaller screens (e.g., mobile) */
 @include media-max(mobile) {
   .games-grid {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Even smaller minmax for very small screens */
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   }
   .game-card {
-    min-width: unset; /* Remove fixed min-width for mobile to let auto-fit work better */
+    min-width: unset;
   }
 }
 
-/* Adjustments for tablets */
 @include media-between(tablet, desktop) {
   .games-grid {
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -207,7 +237,6 @@ watch(
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   height: 284px;
   position: relative;
-  /* min-width: 310px; */ /* This was limiting the grid, now controlled by grid-template-columns */
 }
 
 .game-card:hover {

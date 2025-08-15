@@ -38,16 +38,15 @@ export const useHomeworksStore = defineStore('homeworks', {
         homeworks: [] as ApiHomework[],
         loading: false,
         error: null as string | null,
-        activeHomeworkId: null as number | null, // <-- ДОБАВЛЕНО: ID активной домашки
+        activeHomeworkId: null as number | null,
     }),
 
     actions: {
         /**
-         * ДОБАВЛЕНО: Устанавливает ID активного домашнего задания.
+         * Устанавливает ID активного домашнего задания.
          * @param {number | null} homeworkId - ID домашнего задания или null.
          */
         setActiveHomework(homeworkId: number | null) {
-            console.log('setActiveHomework', homeworkId);
             this.activeHomeworkId = homeworkId;
         },
 
@@ -70,30 +69,44 @@ export const useHomeworksStore = defineStore('homeworks', {
         },
 
         /**
-         * ДОБАВЛЕНО: Отправляет запрос на получение награды за выполненное задание.
+         * ✅ ДОБАВЛЕНО: Отправляет запрос о выполнении ДЗ.
+         * @param {number} homeworkId - ID выполненного домашнего задания.
+         */
+        async markHomeworkAsDone(homeworkId: number) {
+            console.log("req for done homework");
+            try {
+                await api.post('/api/student/homeworks/mark-done', { homework_id: homeworkId });
+                notify({
+                    title: "Домашнее задание выполнено!",
+                    type: "success"
+                });
+                // После успешной отправки обновляем список ДЗ, чтобы видеть актуальный статус
+                await this.fetchHomeworks();
+            } catch (error: any) {
+                const errorMessage = error.response?.data?.message || 'Ошибка при отправке статуса ДЗ';
+                notify({ title: errorMessage, type: "error" });
+                throw error; // Пробрасываем ошибку дальше
+            }
+        },
+
+        /**
+         * Отправляет запрос на получение награды за выполненное задание.
          * @param {number} homeworkId - ID домашнего задания.
          */
         async claimReward(homeworkId: number) {
             try {
-                // Отправляем запрос с нужным payload
                 await api.post('/api/student/homeworks/claim', { homework_id: homeworkId });
-
-                // В случае успеха, удаляем домашку из локального состояния
                 const index = this.homeworks.findIndex(hw => hw.id === homeworkId);
                 if (index !== -1) {
                     this.homeworks.splice(index, 1);
                 }
-
-                // Показываем уведомление об успехе
                 notify({
-                    title: "Награда успешно получена!", // Рекомендуется вынести в переводы
+                    title: "Награда успешно получена!",
                     type: "success"
                 });
-
             } catch (error: any) {
                 const errorMessage = error.response?.data?.message || 'Ошибка при получении награды';
                 notify({ title: errorMessage, type: "error" });
-                // Пробрасываем ошибку дальше, чтобы компонент мог её обработать
                 throw error;
             }
         },
@@ -102,6 +115,7 @@ export const useHomeworksStore = defineStore('homeworks', {
     getters: {
         isLoading: (state) => state.loading,
         getHomeworks: (state) => state.homeworks,
-        getActiveHomeworkId: (state) => state.activeHomeworkId, // <-- ДОБАВЛЕНО: Геттер для ID
+        // Геттер переименован для консистентности, но старый вариант тоже будет работать
+        getActiveHomeworkId: (state) => state.activeHomeworkId,
     },
 });
