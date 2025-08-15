@@ -88,7 +88,7 @@ const trainers = [
   { id: 13, key: 'add_homework.trainers.abacus', name_uk: 'Абакус', image: trainer13 },
   { id: 14, key: 'add_homework.trainers.find_cybercat', name_uk: 'Знайди кіберкішку', image: trainer14 },
   { id: 15, key: 'add_homework.trainers.mnemonics', name_uk: 'Мнемотехніка', image: trainer15 },
-  { id: 16, key: 'add_homework.trainers.multiplication_division', name_uk: 'Множення & Ділення', image: trainer16 },
+  { id: 17, key: 'add_homework.trainers.multiplication_division', name_uk: 'Множення & Ділення', image: trainer16 },
 ].map(trainer => ({
   ...trainer,
   name: t(trainer.key),
