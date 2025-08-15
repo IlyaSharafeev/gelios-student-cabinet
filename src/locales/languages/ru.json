@@ -218,5 +218,7 @@
   "materials.pagination.next_title": "Вперед",
   "materials.mock_item_title": "Книга по скорочтению",
   "account.tabs.progress": "Прогресс",
-  "account.tabs.certificate": "Сертификат"
+  "account.tabs.certificate": "Сертификат",
+  "homework.your_reward": "Ваша награда:",
+  "homework.claim_reward": "Забрать"
 }

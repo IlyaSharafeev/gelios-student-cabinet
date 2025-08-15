@@ -218,5 +218,7 @@
   "materials.pagination.next_title": "Next",
   "materials.mock_item_title": "Speed Reading Book",
   "account.tabs.progress": "Progress",
-  "account.tabs.certificate": "Certificate"
+  "account.tabs.certificate": "Certificate",
+  "homework.your_reward": "Your reward:",
+  "homework.claim_reward": "Claim"
 }

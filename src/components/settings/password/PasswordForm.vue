@@ -167,7 +167,7 @@ const confirmNewPasswordErrors = computed(() => {
 .change-password-page {
   display: flex;
   align-items: center;
-  background-color: #f5f5f5;
+  background-color: #ffffff;
 
   .change-password-form {
     width: 320px;

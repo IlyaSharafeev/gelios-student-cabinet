@@ -36,7 +36,8 @@ interface ActiveHomework extends HomeworkBase {
   rewards: number;
   iconImage: string;
   trainerSlug: string;
-  settings: { [key: string]: any }; // <-- ДОБАВЛЕНО: поле для настроек
+  settings: { [key: string]: any };
+  status: 'pending' | 'done' | string;
 }
 
 interface ScheduledHomework extends HomeworkBase {
@@ -49,6 +50,9 @@ type Homework = ActiveHomework | ScheduledHomework;
 const router = useRouter();
 const { t, locale } = useI18n();
 const homeworksStore = useHomeworksStore();
+
+// ДОБАВЛЕНО: Состояние для отслеживания загрузки кнопки "Забрати"
+const claimingId = ref<number | null>(null);
 
 const slugify = (text: string): string => {
   const ua: { [key: string]: string } = { 'а':'a','б':'b','в':'v','г':'h','ґ':'g','д':'d','е':'e','є':'ie','ж':'zh','з':'z','и':'y','і':'i','ї':'i','й':'i','к':'k','л':'l','м':'m','н':'n','о':'o','п':'p','р':'r','с':'s','т':'t','у':'u','ф':'f','х':'kh','ц':'ts','ч':'ch','ш':'sh','щ':'shch','ь':'','ю':'iu','я':'ia' };
@@ -97,7 +101,6 @@ const getTrainerInfoById = (trainerId: number) => {
   return { titleKey: 'add_homework.trainers.unknown_trainer', iconImage: '', trainerSlug: 'unknown-trainer' };
 };
 
-// Process all homeworks from the store
 const allHomeworks = computed<Homework[]>(() => {
   const now = new Date();
   // @ts-ignore
@@ -119,18 +122,20 @@ const allHomeworks = computed<Homework[]>(() => {
         createdAt: apiHw.createDate,
         dueDate: apiHw.deadline,
         startDate: apiHw.startDate,
-        rewards: 32,
+        rewards: 25,
         iconImage: trainerInfo.iconImage,
         trainerSlug: trainerInfo.trainerSlug,
-        settings: apiHw.homeWorksSettings, // <-- ИЗМЕНЕНО: сохраняем настройки
+        settings: apiHw.homeWorksSettings,
+        status: apiHw.status,
       };
     }
   });
 });
 
-// Separate computed properties for active and scheduled homeworks
-const activeHomeworks = computed(() => allHomeworks.value.filter((hw): hw is ActiveHomework => !hw.isScheduled));
+const pendingHomeworks = computed(() => allHomeworks.value.filter((hw): hw is ActiveHomework => !hw.isScheduled && hw.status === 'pending'));
+const completedHomeworks = computed(() => allHomeworks.value.filter((hw): hw is ActiveHomework => !hw.isScheduled && hw.status === 'done'));
 const scheduledHomeworks = computed(() => allHomeworks.value.filter((hw): hw is ScheduledHomework => hw.isScheduled));
+
 
 const formatTimeRemaining = (ms: number): string => {
   if (ms < 0) ms = 0;
@@ -155,7 +160,7 @@ const updateTimers = () => {
     if (hw.isScheduled) {
       const timeUntilStart = new Date(hw.startDate).getTime() - now;
       timers.value[hw.id] = formatTimeRemaining(timeUntilStart);
-    } else {
+    } else if (hw.status === 'pending') {
       // @ts-ignore
       const timeUntilDeadline = new Date(hw.dueDate).getTime() - now;
       timers.value[hw.id] = timeUntilDeadline < 0
@@ -165,7 +170,6 @@ const updateTimers = () => {
   });
 };
 
-// <-- ИЗМЕНЕНО: функция теперь передает и настройки
 const handleHomeworkAction = (homework: ActiveHomework) => {
   router.push({
     name: 'game-view',
@@ -174,16 +178,33 @@ const handleHomeworkAction = (homework: ActiveHomework) => {
   });
 };
 
+// ИЗМЕНЕНО: Реализована логика получения награды
+const handleClaimReward = async (homework: ActiveHomework) => {
+  if (claimingId.value !== null) return; // Блокируем повторные нажатия
+
+  claimingId.value = homework.id;
+  try {
+    await homeworksStore.claimReward(homework.id);
+    // Стор сам удалит домашку из списка, UI обновится автоматически
+  } catch (error) {
+    console.error("Не удалось получить награду:", error);
+    // Стор уже показал уведомление об ошибке
+  } finally {
+    claimingId.value = null; // Снимаем блокировку
+  }
+};
+
 onMounted(() => {
   homeworksStore.fetchHomeworks();
+  updateTimers();
   interval = setInterval(updateTimers, 1000);
 });
+
 onUnmounted(() => { clearInterval(interval); });
 
 const getProgressBarWidth = (homework: Homework) => {
   const nowMs = new Date().getTime();
   const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
-
   let remainingTimeMs: number;
   let totalDurationMs: number = TWENTY_FOUR_HOURS_MS;
 
@@ -197,7 +218,6 @@ const getProgressBarWidth = (homework: Homework) => {
     if (nowMs > dueDateMs) return '0%';
     remainingTimeMs = dueDateMs - nowMs;
   }
-
   const clampedRemainingTime = Math.min(remainingTimeMs, totalDurationMs);
   const percentage = (clampedRemainingTime / totalDurationMs) * 100;
   return `${Math.max(0, Math.min(100, percentage))}%`;
@@ -215,7 +235,38 @@ const getTimeBarColorClass = (homework: ActiveHomework) => {
     <div v-else-if="homeworksStore.error" class="error-indicator">{{ homeworksStore.error }}</div>
 
     <div v-else class="homework-list">
-      <div v-for="homework in activeHomeworks" :key="homework.id" class="homework-item">
+      <div v-for="homework in completedHomeworks" :key="homework.id" class="homework-item completed">
+        <div class="completed-view">
+          <div class="completed-info">
+            <div class="homework-icon completed-icon">
+              <img v-if="homework.iconImage" :src="homework.iconImage" :alt="t(homework.titleKey)" class="icon-image" />
+              <div class="checkmark-overlay">
+                <svg width="14" height="11" viewBox="0 0 14 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M1 5.5L5 9.5L13 1.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+            </div>
+            <div class="homework-title">{{ t(homework.titleKey) }}</div>
+          </div>
+          <div class="completed-reward">
+            <span>{{ $t('homework.your_reward') }}</span>
+            <span class="reward-value">
+              <svg width="25" height="26" viewBox="0 0 25 26" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12.4416 25.5C10.0325 25.5 7.9739 24.9562 6.26588 23.8687C4.55785 22.7625 3.23232 21.2187 2.28926 19.2375C1.3462 17.225 0.875 14.8812 0.875 12.2C0.875 10.25 1.14648 8.48125 1.68945 6.89375C2.26042 5.275 3.09062 3.90625 4.17812 2.7875C5.29375 1.66875 6.64062 0.775 8.21875 0.20625C9.79688 -0.3625 11.5885 -0.65 13.5938 -0.65C15.6094 -0.65 17.4115 -0.3625 18.999 -0.20625C20.5865 0.15 21.9052 0.85625 22.9542 1.9125C24.0312 2.95 24.749 4.31875 25.1052 6.0125H20.0948C19.899 5.225 19.5427 4.56875 19.026 4.04375C18.5094 3.49062 17.8688 3.05625 17.1042 2.74062C16.3677 2.425 15.5312 2.26875 14.5938 2.26875C13.275 2.26875 12.1552 2.50312 11.2333 2.97187C10.3115 3.44062 9.55833 4.0875 8.97396 4.9125C8.41667 5.70937 8.00625 6.6375 7.74271 7.7C7.50729 8.73125 7.38958 9.7875 7.38958 10.8687C7.38958 12.3 7.64271 13.65 8.14948 14.9125C8.65625 16.175 9.42812 17.1875 10.4646 17.95C11.5292 18.6812 12.926 19.0437 14.6562 19.0437C15.8062 19.0437 16.8115 18.8781 17.6719 18.5469C18.5604 18.1969 19.2646 17.6531 19.7833 16.9125C20.274 16.1406 20.5927 15.2125 20.6656 14.125H11.9625V9.76875H25.875V11.2375C25.875 13.825 25.4365 16.125 24.5583 18.1375C23.6708 20.15 22.3146 21.6812 20.4896 22.725C18.6646 23.7687 16.3948 24.3125 13.6792 24.3125C13.0458 25.0437 12.4583 25.5 12.4416 25.5Z" fill="#D2BB3F"/></svg>
+              +{{ homework.rewards }}
+            </span>
+          </div>
+          <button
+              class="claim-button"
+              @click="handleClaimReward(homework)"
+              :disabled="claimingId === homework.id"
+          >
+            <span v-if="claimingId === homework.id">Загрузка...</span>
+            <span v-else>{{ $t('homework.claim_reward') }}</span>
+          </button>
+        </div>
+      </div>
+
+      <div v-for="homework in pendingHomeworks" :key="homework.id" class="homework-item">
         <div class="homework-icon">
           <img v-if="homework.iconImage" :src="homework.iconImage" :alt="t(homework.titleKey)" class="icon-image" />
         </div>
@@ -260,6 +311,12 @@ const getTimeBarColorClass = (homework: ActiveHomework) => {
 </template>
 
 <style scoped lang="scss">
+/* Стили остаются без изменений, кроме добавления состояний для кнопки */
+.claim-button:disabled {
+  background-color: #a5d6a7;
+  cursor: not-allowed;
+}
+
 // Common styles
 .homeworks-page { padding: 20px; min-height: 100vh; }
 .homework-list { display: flex; flex-direction: column; gap: 15px; max-height: 520px; overflow-y: auto; padding-right: 10px; }
@@ -273,7 +330,7 @@ const getTimeBarColorClass = (homework: ActiveHomework) => {
 .time-bar-progress { height: 100%; border-radius: 10px; transition: width 0.5s ease-in-out; }
 
 // Active homework styles
-.homework-item:not(.scheduled) {
+.homework-item:not(.scheduled):not(.completed) {
   &:nth-child(odd) { background-image: linear-gradient(to right, #e0f7fa, #ffffff); }
   &:nth-child(even) { background-image: linear-gradient(to right, #e8f5e9, #ffffff); }
 }
@@ -319,4 +376,78 @@ const getTimeBarColorClass = (homework: ActiveHomework) => {
 .purple-text { color: #8A2BE2; }
 .time-bar-container.purple { background-color: #E6E6FA; }
 .time-bar-progress.purple { background-color: #9370DB; }
+
+.homework-item.completed {
+  background:
+      radial-gradient(circle at center, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 70%),
+      #E8F5E9; // Светло-зеленый фон
+  padding: 10px 15px;
+}
+
+.completed-view {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.completed-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.completed-icon {
+  position: relative;
+  overflow: visible;
+}
+
+.checkmark-overlay {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 22px;
+  height: 22px;
+  background-color: #4CAF50;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #E8F5E9;
+}
+
+.completed-reward {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.1em;
+  color: #333;
+
+  .reward-value {
+    font-size: 1.2em;
+    gap: 8px;
+    svg {
+      width: 25px;
+      height: 26px;
+    }
+  }
+}
+
+.claim-button {
+  background-color: #66BB6A;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 1em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  min-width: 110px; /* Чтобы кнопка не меняла размер при смене текста */
+  text-align: center;
+
+  &:hover {
+    background-color: #4CAF50;
+  }
+}
 </style>

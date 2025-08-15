@@ -28,7 +28,7 @@ export interface ApiHomework {
     deadline: string;
     startDate: string;
     homeWorksSettings: HomeWorksSettings;
-    status: 'pending' | 'in-progress' | 'completed' | 'overdue';
+    status: 'pending' | 'in-progress' | 'completed' | 'overdue' | 'done';
     statusDate: string;
     createDate: string;
 }
@@ -56,6 +56,35 @@ export const useHomeworksStore = defineStore('homeworks', {
                 notify({ title: errorMessage, type: "error" });
             } finally {
                 this.loading = false;
+            }
+        },
+
+        /**
+         * ДОБАВЛЕНО: Отправляет запрос на получение награды за выполненное задание.
+         * @param {number} homeworkId - ID домашнего задания.
+         */
+        async claimReward(homeworkId: number) {
+            try {
+                // Отправляем запрос с нужным payload
+                await api.post('/api/student/homeworks/claim', { homework_id: homeworkId });
+
+                // В случае успеха, удаляем домашку из локального состояния
+                const index = this.homeworks.findIndex(hw => hw.id === homeworkId);
+                if (index !== -1) {
+                    this.homeworks.splice(index, 1);
+                }
+
+                // Показываем уведомление об успехе
+                notify({
+                    title: "Награда успешно получена!", // Рекомендуется вынести в переводы
+                    type: "success"
+                });
+
+            } catch (error: any) {
+                const errorMessage = error.response?.data?.message || 'Ошибка при получении награды';
+                notify({ title: errorMessage, type: "error" });
+                // Пробрасываем ошибку дальше, чтобы компонент мог её обработать
+                throw error;
             }
         },
     },

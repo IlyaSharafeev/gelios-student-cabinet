@@ -219,5 +219,7 @@
   "materials.pagination.next_title": "Вперед",
   "materials.mock_item_title": "Книга зі швидкочитання",
   "account.tabs.progress": "Прогрес",
-  "account.tabs.certificate": "Сертифікат"
+  "account.tabs.certificate": "Сертифікат",
+  "homework.your_reward": "Ваша награда:",
+  "homework.claim_reward": "Забрать"
 }

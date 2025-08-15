@@ -269,109 +269,109 @@ const phoneErrors = computed(() => {
         <LanguageSelect v-model="form.language" />
       </div>
 
-      <div class="form-group">
-        <label for="email">{{ t('email') }}</label>
-        <div class="input-wrapper">
-          <input
-              id="email-input"
-              v-model="form.email"
-              :disabled="!isEditingEmail"
-              @blur="handleBlur('email')"
-              :class="{ 'error': emailErrors.length, 'editable': isEditingEmail }"
-          />
-          <span class="edit-button" @click="toggleEdit('email', 'email-input', isEditingEmail)">
-            <img
-                :src="isEditingEmail ? SaveIcon : EditIcon"
-                :alt="isEditingEmail ? t('save') : t('edit')"
-                class="edit-icon"
-            />
-          </span>
-        </div>
-        <div v-if="emailErrors.length" class="error-message">
-          {{ emailErrors[0] }}
-        </div>
-      </div>
+<!--      <div class="form-group">-->
+<!--        <label for="email">{{ t('email') }}</label>-->
+<!--        <div class="input-wrapper">-->
+<!--          <input-->
+<!--              id="email-input"-->
+<!--              v-model="form.email"-->
+<!--              :disabled="!isEditingEmail"-->
+<!--              @blur="handleBlur('email')"-->
+<!--              :class="{ 'error': emailErrors.length, 'editable': isEditingEmail }"-->
+<!--          />-->
+<!--          <span class="edit-button" @click="toggleEdit('email', 'email-input', isEditingEmail)">-->
+<!--            <img-->
+<!--                :src="isEditingEmail ? SaveIcon : EditIcon"-->
+<!--                :alt="isEditingEmail ? t('save') : t('edit')"-->
+<!--                class="edit-icon"-->
+<!--            />-->
+<!--          </span>-->
+<!--        </div>-->
+<!--        <div v-if="emailErrors.length" class="error-message">-->
+<!--          {{ emailErrors[0] }}-->
+<!--        </div>-->
+<!--      </div>-->
 
-      <div class="form-group">
-        <label for="phone">{{ t('phone') }}</label>
-        <div class="input-wrapper">
-          <input
-              id="phone-input"
-              v-model="form.phone"
-              :disabled="!isEditingPhone"
-              @blur="handleBlur('phone')"
-              :class="{ 'error': phoneErrors.length, 'editable': isEditingPhone }"
-          />
-          <span class="edit-button" @click="toggleEdit('phone', 'phone-input', isEditingPhone)">
-            <img
-                :src="isEditingPhone ? SaveIcon : EditIcon"
-                :alt="isEditingPhone ? t('save') : t('edit')"
-                class="edit-icon"
-            />
-          </span>
-        </div>
-        <div v-if="phoneErrors.length" class="error-message">
-          {{ phoneErrors[0] }}
-        </div>
-      </div>
+<!--      <div class="form-group">-->
+<!--        <label for="phone">{{ t('phone') }}</label>-->
+<!--        <div class="input-wrapper">-->
+<!--          <input-->
+<!--              id="phone-input"-->
+<!--              v-model="form.phone"-->
+<!--              :disabled="!isEditingPhone"-->
+<!--              @blur="handleBlur('phone')"-->
+<!--              :class="{ 'error': phoneErrors.length, 'editable': isEditingPhone }"-->
+<!--          />-->
+<!--          <span class="edit-button" @click="toggleEdit('phone', 'phone-input', isEditingPhone)">-->
+<!--            <img-->
+<!--                :src="isEditingPhone ? SaveIcon : EditIcon"-->
+<!--                :alt="isEditingPhone ? t('save') : t('edit')"-->
+<!--                class="edit-icon"-->
+<!--            />-->
+<!--          </span>-->
+<!--        </div>-->
+<!--        <div v-if="phoneErrors.length" class="error-message">-->
+<!--          {{ phoneErrors[0] }}-->
+<!--        </div>-->
+<!--      </div>-->
     </div>
 
-    <div class="title">{{ t('notifications') }}</div>
-    <div class="notifications-section">
-      <div class="notifications-section-left">
-        <CustomCheckbox
-            id="lesson-cancel"
-            v-model="form.notifications.lessonCancel"
-            :label="t('lesson_cancel')"
-            :disabled="!areNotificationsEnabled"
-        />
-        <CustomCheckbox
-            id="lesson-reschedule"
-            v-model="form.notifications.lessonReschedule"
-            :label="t('lesson_reschedule')"
-            :disabled="!areNotificationsEnabled"
-        />
-        <CustomCheckbox
-            id="lesson-feedback"
-            v-model="form.notifications.lessonFeedback"
-            :label="t('lesson_feedback')"
-            :disabled="!areNotificationsEnabled"
-        />
-        <CustomCheckbox
-            id="homework-not-done"
-            v-model="form.notifications.homeworkNotDone"
-            :label="t('homework_not_done')"
-            :disabled="!areNotificationsEnabled"
-        />
-      </div>
-      <div class="notifications-section-right">
-        <div class="notifications-header">
-          <button
-              class="toggle-notifications"
-              :class="{ 'toggle-notifications-stop': !areNotificationsEnabled }"
-              @click="toggleDropdown"
-              :aria-expanded="showDropdown"
-              aria-controls="notifications-dropdown"
-              :aria-label="areNotificationsEnabled ? t('pause_notifications') : t('enable_notifications')"
-          >
-            {{ areNotificationsEnabled ? t('pause_notifications') : t('enable_notifications') }}
-          </button>
-          <div v-if="showDropdown" class="dropdown" id="notifications-dropdown">
-            <div
-                v-for="duration in areNotificationsEnabled ? ['15 хв', '30 хв', '1 год', '2 год', '4 год'] : [t('enable_now')]"
-                :key="duration"
-                class="dropdown-item"
-                :class="{ 'selected': duration === selectedDuration || (!areNotificationsEnabled && duration === t('enable_now')) }"
-                @click="toggleNotifications(duration === t('enable_now') ? undefined : duration as '15 хв' | '30 хв' | '1 год' | '2 год' | '4 год')"
-                tabindex="0"
-                @keydown.enter="toggleNotifications(duration === t('enable_now') ? undefined : duration as '15 хв' | '30 хв' | '1 год' | '2 год' | '4 год')"
-            >
-              {{ duration }}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+<!--    <div class="title">{{ t('notifications') }}</div>-->
+<!--    <div class="notifications-section">-->
+<!--      <div class="notifications-section-left">-->
+<!--        <CustomCheckbox-->
+<!--            id="lesson-cancel"-->
+<!--            v-model="form.notifications.lessonCancel"-->
+<!--            :label="t('lesson_cancel')"-->
+<!--            :disabled="!areNotificationsEnabled"-->
+<!--        />-->
+<!--        <CustomCheckbox-->
+<!--            id="lesson-reschedule"-->
+<!--            v-model="form.notifications.lessonReschedule"-->
+<!--            :label="t('lesson_reschedule')"-->
+<!--            :disabled="!areNotificationsEnabled"-->
+<!--        />-->
+<!--        <CustomCheckbox-->
+<!--            id="lesson-feedback"-->
+<!--            v-model="form.notifications.lessonFeedback"-->
+<!--            :label="t('lesson_feedback')"-->
+<!--            :disabled="!areNotificationsEnabled"-->
+<!--        />-->
+<!--        <CustomCheckbox-->
+<!--            id="homework-not-done"-->
+<!--            v-model="form.notifications.homeworkNotDone"-->
+<!--            :label="t('homework_not_done')"-->
+<!--            :disabled="!areNotificationsEnabled"-->
+<!--        />-->
+<!--      </div>-->
+<!--      <div class="notifications-section-right">-->
+<!--        <div class="notifications-header">-->
+<!--          <button-->
+<!--              class="toggle-notifications"-->
+<!--              :class="{ 'toggle-notifications-stop': !areNotificationsEnabled }"-->
+<!--              @click="toggleDropdown"-->
+<!--              :aria-expanded="showDropdown"-->
+<!--              aria-controls="notifications-dropdown"-->
+<!--              :aria-label="areNotificationsEnabled ? t('pause_notifications') : t('enable_notifications')"-->
+<!--          >-->
+<!--            {{ areNotificationsEnabled ? t('pause_notifications') : t('enable_notifications') }}-->
+<!--          </button>-->
+<!--          <div v-if="showDropdown" class="dropdown" id="notifications-dropdown">-->
+<!--            <div-->
+<!--                v-for="duration in areNotificationsEnabled ? ['15 хв', '30 хв', '1 год', '2 год', '4 год'] : [t('enable_now')]"-->
+<!--                :key="duration"-->
+<!--                class="dropdown-item"-->
+<!--                :class="{ 'selected': duration === selectedDuration || (!areNotificationsEnabled && duration === t('enable_now')) }"-->
+<!--                @click="toggleNotifications(duration === t('enable_now') ? undefined : duration as '15 хв' | '30 хв' | '1 год' | '2 год' | '4 год')"-->
+<!--                tabindex="0"-->
+<!--                @keydown.enter="toggleNotifications(duration === t('enable_now') ? undefined : duration as '15 хв' | '30 хв' | '1 год' | '2 год' | '4 год')"-->
+<!--            >-->
+<!--              {{ duration }}-->
+<!--            </div>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
   </div>
 </template>
 
