@@ -110,7 +110,7 @@ const handleGameEvent = async (event: MessageEvent) => {
       console.log(`Homework ${activeId} is done! Sending request...`);
       try {
         await homeworksStore.markHomeworkAsDone(activeId);
-        await router.push('/homework');
+        // await router.push('/homework');
       } catch (error) {
         console.error("Error while marking homework as done:", error);
       }
