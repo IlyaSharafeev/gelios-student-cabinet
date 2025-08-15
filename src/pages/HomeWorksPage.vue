@@ -52,8 +52,12 @@ const { t, locale } = useI18n();
 const homeworksStore = useHomeworksStore();
 
 const slugify = (text: string): string => {
-  const ua: { [key: string]: string } = { 'а':'a','б':'b','в':'v','г':'h','ґ':'g','д':'d','е':'e','є':'ie','ж':'zh','з':'z','и':'i','і':'i','ї':'i','й':'i','к':'k','л':'l','м':'m','н':'n','о':'o','п':'p','р':'r','с':'s','т':'t','у':'u','ф':'f','х':'kh','ц':'ts','ч':'ch','ш':'sh','щ':'shch','ь':'','ю':'iu','я':'ia' };
-  return text.toLowerCase().trim().replace(/[а-яґєїі]/g, match => ua[match]).replace(/ & /g, '-and-').replace(/ /g, '-').replace(/[^\w-]+/g, '');
+  const ua: { [key: string]: string } = { 'а':'a','б':'b','в':'v','г':'h','ґ':'g','д':'d','е':'e','є':'ie','ж':'zh','з':'z','и':'y','і':'i','ї':'i','й':'i','к':'k','л':'l','м':'m','н':'n','о':'o','п':'p','р':'r','с':'s','т':'t','у':'u','ф':'f','х':'kh','ц':'ts','ч':'ch','ш':'sh','щ':'shch','ь':'','ю':'iu','я':'ia' };
+  return text.toLowerCase().trim()
+      .replace(/[а-яґєїі]/g, (match) => ua[match as keyof typeof ua])
+      .replace(/ & /g, '-and-')
+      .replace(/ /g, '-')
+      .replace(/[^\w-]+/g, '');
 };
 
 const pluralize = (key: string, count: number): string => {
@@ -66,23 +70,27 @@ const pluralize = (key: string, count: number): string => {
 };
 
 const trainers = [
-  { id: 1, key: 'add_homework.trainers.find_pair', image: trainer1 },
-  { id: 2, key: 'add_homework.trainers.speed_reading_technique', image: trainer2 },
-  { id: 3, key: 'add_homework.trainers.schulte_table', image: trainer3 },
-  { id: 4, key: 'add_homework.trainers.spritz', image: trainer4 },
-  { id: 5, key: 'add_homework.trainers.mental_arithmetic', image: trainer5 },
-  { id: 6, key: 'add_homework.trainers.fillwords', image: trainer6 },
-  { id: 7, key: 'add_homework.trainers.stroop_test', image: trainer7 },
-  { id: 8, key: 'add_homework.trainers.alphabet', image: trainer8 },
-  { id: 9, key: 'add_homework.trainers.find_word', image: trainer9 },
-  { id: 10, key: 'add_homework.trainers.texts', image: trainer10 },
-  { id: 11, key: 'add_homework.trainers.cybercat', image: trainer11 },
-  { id: 12, key: 'add_homework.trainers.flashcards', image: trainer12 },
-  { id: 13, key: 'add_homework.trainers.abacus', image: trainer13 },
-  { id: 14, key: 'add_homework.trainers.find_cybercat', image: trainer14 },
-  { id: 15, key: 'add_homework.trainers.mnemonics', image: trainer15 },
-  { id: 16, key: 'add_homework.trainers.multiplication_division', image: trainer16 },
-].map(trainer => ({ ...trainer, name: t(trainer.key), slug: slugify(t(trainer.key, 'uk')) }));
+  { id: 1, key: 'add_homework.trainers.find_pair', name_uk: 'Знайди пару', image: trainer1 },
+  { id: 2, key: 'add_homework.trainers.speed_reading_technique', name_uk: 'Тест швидкості читання', image: trainer2 },
+  { id: 3, key: 'add_homework.trainers.schulte_table', name_uk: 'Таблиця Шульте', image: trainer3 },
+  { id: 4, key: 'add_homework.trainers.spritz', name_uk: 'Spritz', image: trainer4 },
+  { id: 5, key: 'add_homework.trainers.mental_arithmetic', name_uk: 'Ментальна арифметика', image: trainer5 },
+  { id: 6, key: 'add_homework.trainers.fillwords', name_uk: 'Філворди', image: trainer6 },
+  { id: 7, key: 'add_homework.trainers.stroop_test', name_uk: 'Тест Струпа', image: trainer7 },
+  { id: 8, key: 'add_homework.trainers.alphabet', name_uk: 'Алфавіт', image: trainer8 },
+  { id: 9, key: 'add_homework.trainers.find_word', name_uk: 'Знайди слово', image: trainer9 },
+  { id: 10, key: 'add_homework.trainers.texts', name_uk: 'Тексти', image: trainer10 },
+  { id: 11, key: 'add_homework.trainers.cybercat', name_uk: 'Кіберкішка', image: trainer11 },
+  { id: 12, key: 'add_homework.trainers.flashcards', name_uk: 'Флеш карти', image: trainer12 },
+  { id: 13, key: 'add_homework.trainers.abacus', name_uk: 'Абакус', image: trainer13 },
+  { id: 14, key: 'add_homework.trainers.find_cybercat', name_uk: 'Знайди кіберкішку', image: trainer14 },
+  { id: 15, key: 'add_homework.trainers.mnemonics', name_uk: 'Мнемотехніка', image: trainer15 },
+  { id: 16, key: 'add_homework.trainers.multiplication_division', name_uk: 'Множення & Ділення', image: trainer16 },
+].map(trainer => ({
+  ...trainer,
+  name: t(trainer.key),
+  slug: slugify(trainer.name_uk)
+}));
 
 const getTrainerInfoById = (trainerId: number) => {
   const trainer = trainers.find(t => t.id === trainerId);
