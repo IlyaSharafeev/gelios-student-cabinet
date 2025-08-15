@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useHomeworksStore } from '@/stores/homeworks';
 
 import trainer1 from '@/assets/backgrounds/trainers/1.png';
 import trainer2 from '@/assets/backgrounds/trainers/2.png';
@@ -59,6 +60,7 @@ const trainers: Trainer[] = [
 const isLoadingIframe = ref(false);
 const route = useRoute();
 const router = useRouter();
+const homeworksStore = useHomeworksStore();
 
 const selectedTrainer = computed(() => {
   const slug = route.params.trainerSlug;
@@ -66,21 +68,14 @@ const selectedTrainer = computed(() => {
   return trainers.find(t => t.slug === slug) || null;
 });
 
-// <-- ДОБАВЛЕНО: новое вычисляемое свойство для URL с конфигурацией
 const configuredIframeUrl = computed(() => {
   if (!selectedTrainer.value) return '';
-
   const homeworkConfigStr = route.query.config as string;
-
   if (homeworkConfigStr) {
-    // Берём базовый URL (всё до знака "?")
     const baseUrl = selectedTrainer.value.iframeUrl.split('?')[0];
-    // Кодируем строку с JSON-конфигурацией для безопасной передачи в URL
     const encodedConfig = encodeURIComponent(homeworkConfigStr);
     return `${baseUrl}?config=${encodedConfig}`;
   }
-
-  // Если конфигурации в URL нет, используем URL по умолчанию
   return selectedTrainer.value.iframeUrl;
 });
 
@@ -105,6 +100,20 @@ watch(
       }
     },
     { immediate: true }
+);
+
+// ✅ Єдиний watch для синхронізації store з роутом
+watch(
+    () => route.query.homeworkId,
+    (newId) => {
+      // Перетворюємо ID з рядка в число, або в null, якщо його немає
+      const homeworkId = newId ? parseInt(newId as string, 10) : null;
+      homeworksStore.setActiveHomework(homeworkId);
+    },
+    {
+      // immediate: true гарантує, що логіка спрацює при першому завантаженні компонента
+      immediate: true,
+    }
 );
 </script>
 

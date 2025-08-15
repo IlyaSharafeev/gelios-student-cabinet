@@ -38,9 +38,19 @@ export const useHomeworksStore = defineStore('homeworks', {
         homeworks: [] as ApiHomework[],
         loading: false,
         error: null as string | null,
+        activeHomeworkId: null as number | null, // <-- ДОБАВЛЕНО: ID активной домашки
     }),
 
     actions: {
+        /**
+         * ДОБАВЛЕНО: Устанавливает ID активного домашнего задания.
+         * @param {number | null} homeworkId - ID домашнего задания или null.
+         */
+        setActiveHomework(homeworkId: number | null) {
+            console.log('setActiveHomework', homeworkId);
+            this.activeHomeworkId = homeworkId;
+        },
+
         /**
          * Загружает список домашних заданий студента с сервера.
          */
@@ -92,5 +102,6 @@ export const useHomeworksStore = defineStore('homeworks', {
     getters: {
         isLoading: (state) => state.loading,
         getHomeworks: (state) => state.homeworks,
+        getActiveHomeworkId: (state) => state.activeHomeworkId, // <-- ДОБАВЛЕНО: Геттер для ID
     },
 });

@@ -171,14 +171,17 @@ const updateTimers = () => {
 };
 
 const handleHomeworkAction = (homework: ActiveHomework) => {
+  // ✅ ВИДАЛЕНО зайвий виклик setActiveHomework
   router.push({
     name: 'game-view',
     params: { trainerSlug: homework.trainerSlug },
-    query: { config: JSON.stringify(homework.settings) }
+    query: {
+      config: JSON.stringify(homework.settings),
+      homeworkId: homework.id
+    }
   });
 };
 
-// ИЗМЕНЕНО: Реализована логика получения награды
 const handleClaimReward = async (homework: ActiveHomework) => {
   if (claimingId.value !== null) return; // Блокируем повторные нажатия
 
