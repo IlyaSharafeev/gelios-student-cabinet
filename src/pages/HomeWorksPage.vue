@@ -21,6 +21,7 @@ import trainer13 from '@/assets/backgrounds/trainers/13.png';
 import trainer14 from '@/assets/backgrounds/trainers/14.png';
 import trainer15 from '@/assets/backgrounds/trainers/15.png';
 import trainer16 from '@/assets/backgrounds/trainers/16.png';
+import {useAuthStore} from "@/stores/auth.ts";
 
 // Interfaces for component data
 interface HomeworkBase {
@@ -50,6 +51,7 @@ type Homework = ActiveHomework | ScheduledHomework;
 const router = useRouter();
 const { t, locale } = useI18n();
 const homeworksStore = useHomeworksStore();
+const authStore = useAuthStore();
 
 // ДОБАВЛЕНО: Состояние для отслеживания загрузки кнопки "Забрати"
 const claimingId = ref<number | null>(null);
@@ -187,7 +189,8 @@ const handleClaimReward = async (homework: ActiveHomework) => {
 
   claimingId.value = homework.id;
   try {
-    await homeworksStore.claimReward(homework.id);
+    await homeworksStore.claimReward(homework.id)
+    await authStore.fetchProfile();
     // Стор сам удалит домашку из списка, UI обновится автоматически
   } catch (error) {
     console.error("Не удалось получить награду:", error);
