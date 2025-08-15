@@ -21,8 +21,6 @@ import trainer13 from '@/assets/backgrounds/trainers/13.png';
 import trainer14 from '@/assets/backgrounds/trainers/14.png';
 import trainer15 from '@/assets/backgrounds/trainers/15.png';
 import trainer16 from '@/assets/backgrounds/trainers/16.png';
-// Import icon for scheduled homework
-// import scheduledIcon from '@/assets/icons/question-mark.svg'; // Укажите правильный путь к иконке
 
 // Interfaces for component data
 interface HomeworkBase {
@@ -38,6 +36,7 @@ interface ActiveHomework extends HomeworkBase {
   rewards: number;
   iconImage: string;
   trainerSlug: string;
+  settings: { [key: string]: any }; // <-- ДОБАВЛЕНО: поле для настроек
 }
 
 interface ScheduledHomework extends HomeworkBase {
@@ -101,6 +100,7 @@ const getTrainerInfoById = (trainerId: number) => {
 // Process all homeworks from the store
 const allHomeworks = computed<Homework[]>(() => {
   const now = new Date();
+  // @ts-ignore
   return homeworksStore.getHomeworks.map((apiHw: ApiHomework) => {
     const isScheduled = new Date(apiHw.startDate) > now;
     if (isScheduled) {
@@ -122,6 +122,7 @@ const allHomeworks = computed<Homework[]>(() => {
         rewards: 32,
         iconImage: trainerInfo.iconImage,
         trainerSlug: trainerInfo.trainerSlug,
+        settings: apiHw.homeWorksSettings, // <-- ИЗМЕНЕНО: сохраняем настройки
       };
     }
   });
@@ -155,6 +156,7 @@ const updateTimers = () => {
       const timeUntilStart = new Date(hw.startDate).getTime() - now;
       timers.value[hw.id] = formatTimeRemaining(timeUntilStart);
     } else {
+      // @ts-ignore
       const timeUntilDeadline = new Date(hw.dueDate).getTime() - now;
       timers.value[hw.id] = timeUntilDeadline < 0
           ? `${t('homework.overdue_by')} ${formatTimeRemaining(Math.abs(timeUntilDeadline))}`
@@ -163,8 +165,13 @@ const updateTimers = () => {
   });
 };
 
+// <-- ИЗМЕНЕНО: функция теперь передает и настройки
 const handleHomeworkAction = (homework: ActiveHomework) => {
-  router.push({ name: 'game-view', params: { trainerSlug: homework.trainerSlug } });
+  router.push({
+    name: 'game-view',
+    params: { trainerSlug: homework.trainerSlug },
+    query: { config: JSON.stringify(homework.settings) }
+  });
 };
 
 onMounted(() => {
@@ -178,23 +185,21 @@ const getProgressBarWidth = (homework: Homework) => {
   const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
 
   let remainingTimeMs: number;
-  let totalDurationMs: number = TWENTY_FOUR_HOURS_MS; // Используем фиксированную длительность в 24 часа
+  let totalDurationMs: number = TWENTY_FOUR_HOURS_MS;
 
   if (homework.isScheduled) {
     const startMs = new Date(homework.startDate).getTime();
     if (nowMs > startMs) return '0%';
     remainingTimeMs = startMs - nowMs;
   } else {
+    // @ts-ignore
     const dueDateMs = new Date(homework.dueDate).getTime();
     if (nowMs > dueDateMs) return '0%';
     remainingTimeMs = dueDateMs - nowMs;
   }
 
-  // Ограничиваем оставшееся время, чтобы бар не был > 100%
   const clampedRemainingTime = Math.min(remainingTimeMs, totalDurationMs);
-
   const percentage = (clampedRemainingTime / totalDurationMs) * 100;
-
   return `${Math.max(0, Math.min(100, percentage))}%`;
 };
 

@@ -66,6 +66,25 @@ const selectedTrainer = computed(() => {
   return trainers.find(t => t.slug === slug) || null;
 });
 
+// <-- ДОБАВЛЕНО: новое вычисляемое свойство для URL с конфигурацией
+const configuredIframeUrl = computed(() => {
+  if (!selectedTrainer.value) return '';
+
+  const homeworkConfigStr = route.query.config as string;
+
+  if (homeworkConfigStr) {
+    // Берём базовый URL (всё до знака "?")
+    const baseUrl = selectedTrainer.value.iframeUrl.split('?')[0];
+    // Кодируем строку с JSON-конфигурацией для безопасной передачи в URL
+    const encodedConfig = encodeURIComponent(homeworkConfigStr);
+    return `${baseUrl}?config=${encodedConfig}`;
+  }
+
+  // Если конфигурации в URL нет, используем URL по умолчанию
+  return selectedTrainer.value.iframeUrl;
+});
+
+
 const selectTrainer = (trainer: Trainer) => {
   router.push({ name: 'game-view', params: { trainerSlug: trainer.slug } });
 };
@@ -105,7 +124,7 @@ watch(
           <div class="spinner"></div>
         </div>
         <iframe
-            :src="selectedTrainer.iframeUrl"
+            :src="configuredIframeUrl"
             class="trainer-iframe"
             frameborder="0"
             allowfullscreen
