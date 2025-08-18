@@ -124,7 +124,7 @@ const allHomeworks = computed<Homework[]>(() => {
         createdAt: apiHw.createDate,
         dueDate: apiHw.deadline,
         startDate: apiHw.startDate,
-        rewards: 25,
+        rewards: 10,
         iconImage: trainerInfo.iconImage,
         trainerSlug: trainerInfo.trainerSlug,
         settings: apiHw.homeWorksSettings,
