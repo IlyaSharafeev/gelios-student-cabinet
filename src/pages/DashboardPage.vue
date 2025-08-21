@@ -216,6 +216,7 @@ onMounted(() => {
   display: flex;
   flex-grow: 1;
   position: relative;
+  max-width: 357px;
 }
 
 .dashboard__scroll-buttons {
@@ -377,6 +378,7 @@ onMounted(() => {
 }
 
 .dashboard__notification {
+  display: none;
   font-size: 22px;
   padding: 20px;
   background-color: #FFFFFF;
@@ -387,6 +389,7 @@ onMounted(() => {
   font-style: Regular;
   line-height: 121%;
   letter-spacing: 0%;
+  z-index: 5;
 
 
   &:after {
@@ -409,6 +412,7 @@ onMounted(() => {
   padding: 28px 32px;
   background: #393956;
   border-radius: 32px;
+  z-index: 5;
 
   &-icon {
     width: 40px;
