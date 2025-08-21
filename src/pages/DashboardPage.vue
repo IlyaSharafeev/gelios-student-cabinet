@@ -147,6 +147,7 @@ onMounted(() => {
       </div>
       <div class="dashboard__column dashboard__column--coins-wrapper">
         <div class="dashboard__coins" data-aos="fade-left" data-aos-delay="400">
+          <div class="ghost-hand"></div>
           <div class="dashboard__coins-icon">
             <svg width="30" height="33" viewBox="0 0 30 33" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
@@ -406,7 +407,7 @@ onMounted(() => {
   display: flex;
   gap: 10px;
   padding: 28px 32px;
-  background: #FF7B7B;
+  background: #393956;
   border-radius: 32px;
 
   &-icon {
@@ -480,5 +481,17 @@ onMounted(() => {
     justify-content: center;
     margin-bottom: 10px;
   }
+}
+
+.ghost-hand {
+  position: absolute;
+  right: 0;
+  top: -50px;
+  background: url('@/assets/backgrounds/ghost-hand.png');
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 73px;
+  height: 73px;
 }
 </style>

@@ -85,7 +85,12 @@ const showBackgroundElements = computed(() => {
           <router-view />
         </main>
 
-        <div class="characters" v-if="showBackgroundElements"></div>
+<!--        <div class="characters" v-if="showBackgroundElements"></div>-->
+        <div class="castle" v-if="showBackgroundElements"></div>
+        <div class="wednesday-cat" v-if="showBackgroundElements"></div>
+        <div class="halloween-woman" v-if="showBackgroundElements"></div>
+        <div class="halloween-man" v-if="showBackgroundElements"></div>
+        <div class="ghost-car" v-if="showBackgroundElements"></div>
       </div>
     </div>
     <div v-else class="content-only">
@@ -184,6 +189,7 @@ const showBackgroundElements = computed(() => {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  background: transparent;
   width: 100%;
   height: 100vh;
 }
@@ -200,6 +206,81 @@ const showBackgroundElements = computed(() => {
   /* Позиционирование относительно вьюпорта */
   right: -5vw; /* Пример: -5% от ширины вьюпорта */
   bottom: -20vh; /* Пример: -20% от высоты вьюпорта */
+  transform: translateY(0px);
+}
+
+.wednesday-cat {
+  background: url('@/assets/backgrounds/wednesday-cat.png');
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  /* Использование vw и vh для ширины и высоты */
+  width: 20vw; /* Пример: 40% от ширины вьюпорта */
+  height: 35vh; /* Пример: 70% от высоты вьюпорта */
+  position: absolute;
+  /* Позиционирование относительно вьюпорта */
+  right: 15vw; /* Пример: -5% от ширины вьюпорта */
+  bottom: 0vh; /* Пример: -20% от высоты вьюпорта */
+  transform: translateY(0px);
+}
+
+.halloween-woman {
+  background: url('@/assets/backgrounds/halloween-woman.png');
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  /* Использование vw и vh для ширины и высоты */
+  width: 20vw; /* Пример: 40% от ширины вьюпорта */
+  height: 35vh; /* Пример: 70% от высоты вьюпорта */
+  position: absolute;
+  /* Позиционирование относительно вьюпорта */
+  right: 30vw; /* Пример: -5% от ширины вьюпорта */
+  bottom: 0vh; /* Пример: -20% от высоты вьюпорта */
+  transform: translateY(0px);
+}
+
+.halloween-man {
+  background: url('@/assets/backgrounds/halloween-man.png');
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  /* Использование vw и vh для ширины и высоты */
+  width: 15vw; /* Пример: 40% от ширины вьюпорта */
+  height: 30vh; /* Пример: 70% от высоты вьюпорта */
+  position: absolute;
+  /* Позиционирование относительно вьюпорта */
+  right: 0vw; /* Пример: -5% от ширины вьюпорта */
+  bottom: 0vh; /* Пример: -20% от высоты вьюпорта */
+  transform: translateY(0px);
+}
+
+.ghost-car {
+  background: url('@/assets/backgrounds/ghost-car.png');
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  /* Использование vw и vh для ширины и высоты */
+  width: 15vw; /* Пример: 40% от ширины вьюпорта */
+  height: 10vh; /* Пример: 70% от высоты вьюпорта */
+  position: absolute;
+  /* Позиционирование относительно вьюпорта */
+  right: 40vw; /* Пример: -5% от ширины вьюпорта */
+  bottom: 19vh; /* Пример: -20% от высоты вьюпорта */
+  transform: translateY(0px);
+}
+
+.castle {
+  background: url('@/assets/backgrounds/castle.png');
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  /* Использование vw и vh для ширины и высоты */
+  width: 50vw; /* Пример: 40% от ширины вьюпорта */
+  height: 70vh; /* Пример: 70% от высоты вьюпорта */
+  position: absolute;
+  /* Позиционирование относительно вьюпорта */
+  right: -4vw; /* Пример: -5% от ширины вьюпорта */
+  bottom: 0vh; /* Пример: -20% от высоты вьюпорта */
   transform: translateY(0px);
 }
 
