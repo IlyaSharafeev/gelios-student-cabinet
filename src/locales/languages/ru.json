@@ -30,7 +30,7 @@
   "general": "Общие",
   "password": "Пароль",
   "logout": "Выйти",
-  "dashboard.greeting": "Добрый день",
+  "dashboard.greeting": "Привет",
   "dashboard.statistics.title": "Статистика",
   "dashboard.statistics.students_count": "Количество учеников",
   "dashboard.statistics.homework_count": "Домашних заданий к выполнению",
