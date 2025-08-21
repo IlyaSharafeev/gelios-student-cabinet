@@ -408,7 +408,7 @@ onMounted(() => {
 
 .dashboard__coins {
   display: flex;
-  gap: 10px;
+  gap: 20px;
   padding: 28px 32px;
   background: #393956;
   border-radius: 32px;
