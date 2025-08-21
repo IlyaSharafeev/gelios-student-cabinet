@@ -220,7 +220,7 @@ const showBackgroundElements = computed(() => {
   position: absolute;
   /* Позиционирование относительно вьюпорта */
   right: 15vw; /* Пример: -5% от ширины вьюпорта */
-  bottom: 0vh; /* Пример: -20% от высоты вьюпорта */
+  bottom: -3vh; /* Пример: -20% от высоты вьюпорта */
   transform: translateY(0px);
 }
 
@@ -234,7 +234,7 @@ const showBackgroundElements = computed(() => {
   height: 35vh; /* Пример: 70% от высоты вьюпорта */
   position: absolute;
   /* Позиционирование относительно вьюпорта */
-  right: 30vw; /* Пример: -5% от ширины вьюпорта */
+  right: 35vw; /* Пример: -5% от ширины вьюпорта */
   bottom: 0vh; /* Пример: -20% от высоты вьюпорта */
   transform: translateY(0px);
 }
@@ -245,8 +245,8 @@ const showBackgroundElements = computed(() => {
   background-position: center;
   background-repeat: no-repeat;
   /* Использование vw и vh для ширины и высоты */
-  width: 15vw; /* Пример: 40% от ширины вьюпорта */
-  height: 30vh; /* Пример: 70% от высоты вьюпорта */
+  width: 20vw; /* Пример: 40% от ширины вьюпорта */
+  height: 35vh; /* Пример: 70% от высоты вьюпорта */
   position: absolute;
   /* Позиционирование относительно вьюпорта */
   right: 0vw; /* Пример: -5% от ширины вьюпорта */
@@ -254,20 +254,20 @@ const showBackgroundElements = computed(() => {
   transform: translateY(0px);
 }
 
-.ghost-car {
-  background: url('@/assets/backgrounds/ghost-car.png');
-  background-size: contain;
-  background-position: center;
-  background-repeat: no-repeat;
-  /* Использование vw и vh для ширины и высоты */
-  width: 15vw; /* Пример: 40% от ширины вьюпорта */
-  height: 10vh; /* Пример: 70% от высоты вьюпорта */
-  position: absolute;
-  /* Позиционирование относительно вьюпорта */
-  right: 40vw; /* Пример: -5% от ширины вьюпорта */
-  bottom: 19vh; /* Пример: -20% от высоты вьюпорта */
-  transform: translateY(0px);
-}
+//.ghost-car {
+//  background: url('@/assets/backgrounds/ghost-car.png');
+//  background-size: contain;
+//  background-position: center;
+//  background-repeat: no-repeat;
+//  /* Использование vw и vh для ширины и высоты */
+//  width: 15vw; /* Пример: 40% от ширины вьюпорта */
+//  height: 10vh; /* Пример: 70% от высоты вьюпорта */
+//  position: absolute;
+//  /* Позиционирование относительно вьюпорта */
+//  right: 40vw; /* Пример: -5% от ширины вьюпорта */
+//  bottom: 19vh; /* Пример: -20% от высоты вьюпорта */
+//  transform: translateY(0px);
+//}
 
 .castle {
   background: url('@/assets/backgrounds/castle.png');
@@ -280,7 +280,7 @@ const showBackgroundElements = computed(() => {
   position: absolute;
   /* Позиционирование относительно вьюпорта */
   right: -4vw; /* Пример: -5% от ширины вьюпорта */
-  bottom: 0vh; /* Пример: -20% от высоты вьюпорта */
+  bottom: -4vh; /* Пример: -20% от высоты вьюпорта */
   transform: translateY(0px);
 }
 
